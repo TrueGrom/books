@@ -16,7 +16,7 @@ func Init() *gorm.DB {
 	if err != nil {
 		fmt.Println("db err: ", err)
 	}
-	//db.DB().SetMaxIdleConns(10)
+	db.DB().SetMaxIdleConns(10)
 	DB = db
 	return DB
 }

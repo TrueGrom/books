@@ -36,3 +36,21 @@ func NewUserModelValidator() UserModelValidator {
 	userModelValidator := UserModelValidator{}
 	return userModelValidator
 }
+
+type LoginRequestValidator struct {
+	Username string `json:"username" binding:"min=4,max=255"`
+	Password string `json:"password" binding:"exists,min=8,max=255"`
+}
+
+func (self *LoginRequestValidator) Bind(c *gin.Context) error {
+	err := common.Bind(c, self)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+func NewLoginRequestValidator() LoginRequestValidator {
+	loginRequestValidator := LoginRequestValidator{}
+	return loginRequestValidator
+}

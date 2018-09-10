@@ -6,11 +6,11 @@ import (
 	"golang.org/x/crypto/bcrypt"
 )
 
-const cost = 15
+const cost = 7
 
 type UserModel struct {
 	ID           uint    `gorm:"primary_key"`
-	Username     string  `gorm:"column:username"`
+	Username     string  `gorm:"column:username;unique_index"`
 	Email        string  `gorm:"column:email;unique_index"`
 	Bio          string  `gorm:"column:bio;size:1024"`
 	Image        *string `gorm:"column:image"`

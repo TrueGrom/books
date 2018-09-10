@@ -8,7 +8,7 @@ import (
 
 func UsersRegister(router *gin.RouterGroup) {
 	router.POST("/", UserSighup)
-	router.POST("/login", UserLogin)
+	router.POST("/login", LoginUser)
 }
 
 func UserSighup(c *gin.Context) {
@@ -22,10 +22,20 @@ func UserSighup(c *gin.Context) {
 		c.JSON(http.StatusUnprocessableEntity, common.NewError("database", err))
 		return
 	}
-	c.Set("my_user_model", userModelValidator.userModel)
 	c.JSON(http.StatusCreated, gin.H{"user": "suc"})
 }
 
-func UserLogin(c *gin.Context) {
-
+func LoginUser(c *gin.Context) {
+	userModelValidator := NewLoginRequestValidator()
+	if err := userModelValidator.Bind(c); err != nil {
+		c.JSON(http.StatusUnprocessableEntity, common.NewValidatorError(err))
+		return
+	}
+	user, err := FindOneUser(&UserModel{Username: userModelValidator.Username})
+	if err != nil {
+		common.RenderResponse(c, http.StatusBadRequest, common.CommonError{gin.H{"errors": "user not found"}}, nil)
+		return
+	}
+	token := common.GenToken(user.ID)
+	common.RenderResponse(c, http.StatusOK, nil, gin.H{"token": token})
 }

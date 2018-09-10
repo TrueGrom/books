@@ -6,6 +6,7 @@ import (
 	"time"
 	//"github.com/gin-gonic/gin/binding"
 	"fmt"
+	"github.com/gin-gonic/gin/binding"
 	"gopkg.in/go-playground/validator.v8"
 )
 
@@ -23,9 +24,8 @@ func GenToken(id uint) string {
 }
 
 func Bind(c *gin.Context, obj interface{}) error {
-	//b := binding.Default(c.Request.Method, c.ContentType())
-	return c.ShouldBindJSON(obj)
-	//return c.ShouldBindWith(obj, b)
+	b := binding.Default(c.Request.Method, c.ContentType())
+	return c.ShouldBindWith(obj, b)
 }
 
 type CommonError struct {
@@ -54,4 +54,17 @@ func NewError(key string, err error) CommonError {
 	res.Errors = make(map[string]interface{})
 	res.Errors[key] = err.Error()
 	return res
+}
+
+func RenderResponse(c *gin.Context, code int, errors interface{}, data interface{}) {
+	if errors == nil {
+		errors = CommonError{Errors: gin.H{"errors": nil}}
+	}
+	err := errors.(CommonError)
+
+	body := gin.H{"data": data}
+	for k, v := range err.Errors {
+		body[k] = v
+	}
+	c.JSON(code, body)
 }
