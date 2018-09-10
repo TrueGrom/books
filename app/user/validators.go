@@ -1,7 +1,7 @@
 package user
 
 import (
-	"books-backend/common"
+	"books-backend/app/common"
 	"github.com/gin-gonic/gin"
 )
 
@@ -23,9 +23,8 @@ func (self *UserModelValidator) Bind(c *gin.Context) error {
 	self.userModel.Email = self.Email
 	self.userModel.Bio = self.Bio
 
-	if self.Password != common.NBRandomPassword {
-		self.userModel.setPassword(self.Password)
-	}
+	self.userModel.setPassword(self.Password)
+
 	if self.Image != "" {
 		self.userModel.Image = &self.Image
 	}

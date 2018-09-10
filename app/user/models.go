@@ -1,7 +1,7 @@
 package user
 
 import (
-	"books-backend/common"
+	"books-backend/app/common"
 	"errors"
 	"golang.org/x/crypto/bcrypt"
 )

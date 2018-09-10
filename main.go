@@ -1,8 +1,8 @@
 package main
 
 import (
-	"books-backend/common"
-	"books-backend/user"
+	"books-backend/app/common"
+	"books-backend/app/user"
 	"github.com/gin-gonic/gin"
 	"github.com/jinzhu/gorm"
 	_ "github.com/jinzhu/gorm/dialects/postgres"

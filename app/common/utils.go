@@ -11,7 +11,6 @@ import (
 )
 
 const NBSecretPassword = "A String Very Very Very Strong!!@##$!@#$"
-const NBRandomPassword = "A String Very Very Very Niubilty!!@##$!@#4"
 
 func GenToken(id uint) string {
 	jwt_token := jwt.New(jwt.GetSigningMethod("HS256"))

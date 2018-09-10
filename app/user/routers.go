@@ -1,7 +1,7 @@
 package user
 
 import (
-	"books-backend/common"
+	"books-backend/app/common"
 	"github.com/gin-gonic/gin"
 	"net/http"
 )

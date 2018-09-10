@@ -1,6 +1,7 @@
 package common
 
 import (
+	"books-backend/app"
 	"fmt"
 	"github.com/jinzhu/gorm"
 )
@@ -12,7 +13,13 @@ type Database struct {
 var DB *gorm.DB
 
 func Init() *gorm.DB {
-	db, err := gorm.Open("postgres", "host=localhost port=5432 user=books dbname=books password=books")
+	configDB := fmt.Sprintf("host=%s port=%s user=%s dbname=%s password=%s",
+		app.DB_HOST,
+		app.DB_PORT,
+		app.DB_USER,
+		app.DB_NAME,
+		app.DB_PASSWORD)
+	db, err := gorm.Open("postgres", configDB)
 	if err != nil {
 		fmt.Println("db err: ", err)
 	}
