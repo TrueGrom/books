@@ -13,12 +13,13 @@ type Database struct {
 var DB *gorm.DB
 
 func Init() *gorm.DB {
-	configDB := fmt.Sprintf("host=%s port=%s user=%s dbname=%s password=%s",
+	configDB := fmt.Sprintf("host=%s port=%s user=%s dbname=%s password=%s sslmode=%s",
 		app.DB_HOST,
 		app.DB_PORT,
 		app.DB_USER,
 		app.DB_NAME,
-		app.DB_PASSWORD)
+		app.DB_PASSWORD,
+		app.DB_SSL_MODE)
 	db, err := gorm.Open("postgres", configDB)
 	if err != nil {
 		fmt.Println("db err: ", err)
