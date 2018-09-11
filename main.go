@@ -19,10 +19,11 @@ func main() {
 	defer db.Close()
 
 	r := gin.Default()
+	r.Use(common.CORSMiddleware())
 
 	v1 := r.Group("/api")
 
-	user.UsersRegister(v1.Group("user/"))
-
+	userGroup := v1.Group("user/")
+	user.UsersRegister(userGroup)
 	r.Run()
 }
