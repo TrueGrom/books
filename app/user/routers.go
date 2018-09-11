@@ -14,21 +14,20 @@ func UsersRegister(router *gin.RouterGroup) {
 func UserSighup(c *gin.Context) {
 	userModelValidator := NewUserModelValidator()
 	if err := userModelValidator.Bind(c); err != nil {
-		c.JSON(http.StatusUnprocessableEntity, common.NewValidatorError(err))
+		common.RenderResponse(c, http.StatusUnprocessableEntity, common.NewValidatorError(err), nil)
 		return
 	}
-
 	if err := SaveOne(&userModelValidator.userModel); err != nil {
-		c.JSON(http.StatusUnprocessableEntity, common.NewError("database", err))
+		common.RenderResponse(c, http.StatusUnprocessableEntity, common.NewError("database", err), nil)
 		return
 	}
-	c.JSON(http.StatusCreated, gin.H{"user": "suc"})
+	common.RenderResponse(c, http.StatusCreated, nil, nil)
 }
 
 func LoginUser(c *gin.Context) {
 	userModelValidator := NewLoginRequestValidator()
 	if err := userModelValidator.Bind(c); err != nil {
-		c.JSON(http.StatusUnprocessableEntity, common.NewValidatorError(err))
+		common.RenderResponse(c, http.StatusUnprocessableEntity, common.NewValidatorError(err), nil)
 		return
 	}
 	user, err := FindOneUser(&UserModel{Username: userModelValidator.Username})

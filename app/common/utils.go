@@ -56,14 +56,19 @@ func NewError(key string, err error) CommonError {
 }
 
 func RenderResponse(c *gin.Context, code int, errors interface{}, data interface{}) {
-	if errors == nil {
-		errors = CommonError{Errors: gin.H{"errors": nil}}
-	}
-	err := errors.(CommonError)
+	body := gin.H{}
 
-	body := gin.H{"data": data}
-	for k, v := range err.Errors {
-		body[k] = v
+	if errors != nil {
+		err := errors.(CommonError)
+		for k, v := range err.Errors {
+			body[k] = v
+		}
+	}
+	if code >= 200 && code <= 299 {
+		body["success"] = true
+		body["data"] = data
+	} else {
+		body["success"] = false
 	}
 	c.JSON(code, body)
 }

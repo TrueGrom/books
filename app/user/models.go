@@ -19,7 +19,6 @@ type UserModel struct {
 
 func AutoMigrate() {
 	db := common.GetDB()
-
 	db.AutoMigrate(&UserModel{})
 }
 
