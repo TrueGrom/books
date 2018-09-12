@@ -11,6 +11,10 @@ func UsersRegister(router *gin.RouterGroup) {
 	router.POST("/login", LoginUser)
 }
 
+func UsersModify(router *gin.RouterGroup) {
+	router.POST("/reset_password/:username", LoginReset)
+}
+
 func UserSighup(c *gin.Context) {
 	userModelValidator := NewUserModelValidator()
 	if err := userModelValidator.Bind(c); err != nil {
@@ -25,16 +29,53 @@ func UserSighup(c *gin.Context) {
 }
 
 func LoginUser(c *gin.Context) {
-	userModelValidator := NewLoginRequestValidator()
-	if err := userModelValidator.Bind(c); err != nil {
+	userLoginRequestValidator := NewLoginRequestValidator()
+	if err := userLoginRequestValidator.Bind(c); err != nil {
 		common.RenderResponse(c, http.StatusUnprocessableEntity, common.NewValidatorError(err), nil)
 		return
 	}
-	user, err := FindOneUser(&UserModel{Username: userModelValidator.Username})
+	user, err := FindOneUser(&UserModel{Username: userLoginRequestValidator.Username})
 	if err != nil {
-		common.RenderResponse(c, http.StatusBadRequest, common.CommonError{gin.H{"errors": "user not found"}}, nil)
+		common.RenderResponse(c,
+			http.StatusForbidden,
+			common.CommonError{Errors: gin.H{"errors": "Invalid username or password"}},
+			nil)
+		return
+	}
+	if err = user.checkPassword(userLoginRequestValidator.Password); err != nil {
+		common.RenderResponse(c,
+			http.StatusForbidden,
+			common.CommonError{Errors: gin.H{"errors": "Invalid username or password"}},
+			nil)
 		return
 	}
 	token := common.GenToken(user.ID)
 	common.RenderResponse(c, http.StatusOK, nil, gin.H{"token": token})
+}
+
+func LoginReset(c *gin.Context) {
+	username := c.Param("username")
+	loginResetRequestValidator := NewLoginResetRequestValidator()
+	if err := loginResetRequestValidator.Bind(c); err != nil {
+		common.RenderResponse(c, http.StatusUnprocessableEntity, common.NewValidatorError(err), nil)
+		return
+	}
+	user, err := FindOneUser(&UserModel{Username: username})
+	if err != nil {
+		common.RenderResponse(c,
+			http.StatusBadRequest,
+			common.CommonError{Errors: gin.H{"errors": "Invalid username or password"}},
+			nil)
+		return
+	}
+	if err = user.checkPassword(loginResetRequestValidator.Password); err != nil {
+		common.RenderResponse(c,
+			http.StatusForbidden,
+			common.CommonError{Errors: gin.H{"errors": "Invalid username or password"}},
+			nil)
+		return
+	}
+	user.setPassword(loginResetRequestValidator.NewPassword)
+	user.Update(user)
+	common.RenderResponse(c, http.StatusOK, nil, nil)
 }
