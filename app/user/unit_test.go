@@ -26,6 +26,16 @@ func newUserModel() UserModel {
 	}
 }
 
+type req struct {
+	init           func(*http.Request)
+	url            string
+	method         string
+	bodyData       string
+	expectedCode   int
+	responseRegexg string
+	msg            string
+}
+
 func userModelMocker(n int) []UserModel {
 	var offset int
 	test_db.Model(&UserModel{}).Count(&offset)
@@ -45,7 +55,7 @@ func userModelMocker(n int) []UserModel {
 	return ret
 }
 
-func TestUserModel(t *testing.T) {
+func TestUserSignUp(t *testing.T) {
 	asserts := assert.New(t)
 
 	r := gin.New()
@@ -77,7 +87,7 @@ func TestUserModel(t *testing.T) {
 	asserts.Regexp(req.responseRegexg, w.Body.String(), "Response Content - "+req.msg)
 }
 
-func TestUser(t *testing.T) {
+func TestUserModel(t *testing.T) {
 	asserts := assert.New(t)
 
 	//Testing UserModel's password feature
@@ -99,14 +109,4 @@ func TestUser(t *testing.T) {
 
 	err = userModel.checkPassword("asd123!@#ASD")
 	asserts.NoError(err, "password should be checked and validated")
-}
-
-type req struct {
-	init           func(*http.Request)
-	url            string
-	method         string
-	bodyData       string
-	expectedCode   int
-	responseRegexg string
-	msg            string
 }
