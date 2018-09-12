@@ -26,7 +26,7 @@ func newUserModel() UserModel {
 	}
 }
 
-type req struct {
+type request struct {
 	init           func(*http.Request)
 	url            string
 	method         string
@@ -60,7 +60,7 @@ func TestUserSignUp(t *testing.T) {
 
 	r := gin.New()
 	UsersRegister(r.Group("/user"))
-	req := req{
+	req := request{
 		func(req *http.Request) {
 			common.TestDBFree(test_db)
 			test_db = common.TestDBInit()
