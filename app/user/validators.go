@@ -53,3 +53,21 @@ func NewLoginRequestValidator() LoginRequestValidator {
 	loginRequestValidator := LoginRequestValidator{}
 	return loginRequestValidator
 }
+
+type LoginResetRequestValidator struct {
+	Password    string `json:"password" binding:"exists,min=8,max=255"`
+	NewPassword string `json:"new_password" binding:"exists,min=8,max=255"`
+}
+
+func (self *LoginResetRequestValidator) Bind(c *gin.Context) error {
+	err := common.Bind(c, self)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+func NewLoginResetRequestValidator() LoginResetRequestValidator {
+	loginResetRequestValidator := LoginResetRequestValidator{}
+	return loginResetRequestValidator
+}

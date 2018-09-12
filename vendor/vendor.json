@@ -11,6 +11,12 @@
 			"revision": ""
 		},
 		{
+			"checksumSHA1": "CSPbwbyzqA6sfORicn4HFtIhF/c=",
+			"path": "github.com/davecgh/go-spew/spew",
+			"revision": "d8f796af33cc11cb798c1aaeb27a4ebc5099927d",
+			"revisionTime": "2018-08-30T19:11:22Z"
+		},
+		{
 			"checksumSHA1": "mUeojTdLEyzYOki70VUAeeYr/wQ=",
 			"path": "github.com/dgrijalva/jwt-go",
 			"revision": "0b96aaa707760d6ab28d9b9d1913ff5993328bae",
@@ -73,6 +79,12 @@
 			"revisionTime": "2018-08-18T23:14:33Z"
 		},
 		{
+			"checksumSHA1": "4VZ1gLZHMumRjV3fclS1aX8S1aQ=",
+			"path": "github.com/jinzhu/gorm/dialects/sqlite",
+			"revision": "123d4f50ef8a8209ee8434daa41c6045a9111864",
+			"revisionTime": "2018-09-09T23:11:00Z"
+		},
+		{
 			"checksumSHA1": "4eelJOSLZoDzLuaJvgilOBVNovU=",
 			"path": "github.com/jinzhu/inflection",
 			"revision": "04140366298a54a039076d798123ffa108fff46c",
@@ -109,6 +121,12 @@
 			"revisionTime": "2018-08-30T10:17:45Z"
 		},
 		{
+			"checksumSHA1": "Gpp9nceIMUVIb+ToBUoOdEBCyPo=",
+			"path": "github.com/mattn/go-sqlite3",
+			"revision": "1a378fb5bb5c0b41b45a0bd61a984072fe0fd0fb",
+			"revisionTime": "2018-09-11T02:41:34Z"
+		},
+		{
 			"checksumSHA1": "ZTcgWKWHsrX0RXYVXn5Xeb8Q0go=",
 			"path": "github.com/modern-go/concurrent",
 			"revision": "bacd9c7ef1dd9b15be4a9909b8ac7a4e313eec94",
@@ -119,6 +137,18 @@
 			"path": "github.com/modern-go/reflect2",
 			"revision": "94122c33edd36123c84d5368cfb2b69df93a0ec8",
 			"revisionTime": "2018-07-18T01:23:57Z"
+		},
+		{
+			"checksumSHA1": "LuFv4/jlrmFNnDb/5SCSEPAM9vU=",
+			"path": "github.com/pmezard/go-difflib/difflib",
+			"revision": "792786c7400a136282c1664665ae0a8db921c6c2",
+			"revisionTime": "2016-01-10T10:55:54Z"
+		},
+		{
+			"checksumSHA1": "c6pbpF7eowwO59phRTpF8cQ80Z0=",
+			"path": "github.com/stretchr/testify/assert",
+			"revision": "f35b8ab0b5a2cef36673838d662e249dd9c94686",
+			"revisionTime": "2018-05-06T18:05:49Z"
 		},
 		{
 			"checksumSHA1": "r5mYMnU412QZoiUqOxq/mJLYc4M=",

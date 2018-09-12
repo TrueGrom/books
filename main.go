@@ -25,5 +25,7 @@ func main() {
 
 	userGroup := v1.Group("user/")
 	user.UsersRegister(userGroup)
+	user.UsersModify(userGroup)
+
 	r.Run()
 }
