@@ -71,3 +71,38 @@ func NewLoginResetRequestValidator() LoginResetRequestValidator {
 	loginResetRequestValidator := LoginResetRequestValidator{}
 	return loginResetRequestValidator
 }
+
+type ForgetPasswordRequestValidator struct {
+	Username string `json:"username" binding:"min=4,max=255"`
+}
+
+func (self *ForgetPasswordRequestValidator) Bind(c *gin.Context) error {
+	err := common.Bind(c, self)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+func NewForgetPasswordRequestValidator() ForgetPasswordRequestValidator {
+	forgetPasswordRequestValidator := ForgetPasswordRequestValidator{}
+	return forgetPasswordRequestValidator
+}
+
+type GetNewPasswordRequestValidator struct {
+	Password string `json:"password" binding:"min=4,max=255"`
+	Token    string `json:"token" binding:"required"`
+}
+
+func (self *GetNewPasswordRequestValidator) Bind(c *gin.Context) error {
+	err := common.Bind(c, self)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+func NewGetNewPasswordRequestValidator() GetNewPasswordRequestValidator {
+	getNewPasswordRequestValidator := GetNewPasswordRequestValidator{}
+	return getNewPasswordRequestValidator
+}

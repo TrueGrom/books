@@ -23,7 +23,7 @@ func main() {
 
 	v1 := r.Group("/api")
 
-	userGroup := v1.Group("user/")
+	userGroup := v1.Group("users/")
 	user.UsersRegister(userGroup)
 	user.UsersModify(userGroup)
 

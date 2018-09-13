@@ -9,6 +9,8 @@ import (
 func UsersRegister(router *gin.RouterGroup) {
 	router.POST("/", UserSighup)
 	router.POST("/login", LoginUser)
+	router.POST("/forget_password", ForgetPassword)
+	router.POST("/reset_forget_password", GetNewPassword)
 }
 
 func UsersModify(router *gin.RouterGroup) {
@@ -53,6 +55,7 @@ func LoginUser(c *gin.Context) {
 	common.RenderResponse(c, http.StatusOK, nil, gin.H{"token": token})
 }
 
+// View for reset User password by username
 func LoginReset(c *gin.Context) {
 	username := c.Param("username")
 	loginResetRequestValidator := NewLoginResetRequestValidator()
@@ -76,6 +79,40 @@ func LoginReset(c *gin.Context) {
 		return
 	}
 	user.setPassword(loginResetRequestValidator.NewPassword)
+	user.Update(user)
+	common.RenderResponse(c, http.StatusOK, nil, nil)
+}
+
+func ForgetPassword(c *gin.Context) {
+	forgetPasswordRequestValidator := NewForgetPasswordRequestValidator()
+	if err := forgetPasswordRequestValidator.Bind(c); err != nil {
+		common.RenderResponse(c, http.StatusUnprocessableEntity, common.NewValidatorError(err), nil)
+		return
+	}
+	user, err := FindOneUser(&UserModel{Username: forgetPasswordRequestValidator.Username})
+	if err != nil {
+		common.RenderResponse(c,
+			http.StatusBadRequest,
+			common.CommonError{Errors: gin.H{"errors": "Invalid username"}},
+			nil)
+		return
+	}
+	SendEmailWithResetLink(user)
+	common.RenderResponse(c, http.StatusOK, nil, nil)
+}
+
+func GetNewPassword(c *gin.Context) {
+	getNewPasswordRequestValidator := NewGetNewPasswordRequestValidator()
+	if err := getNewPasswordRequestValidator.Bind(c); err != nil {
+		common.RenderResponse(c, http.StatusUnprocessableEntity, common.NewValidatorError(err), nil)
+		return
+	}
+	user, err := TokenParse(getNewPasswordRequestValidator.Token)
+	if err != nil {
+		common.RenderResponse(c, http.StatusUnprocessableEntity, "Token is invalid", nil)
+		return
+	}
+	user.setPassword(getNewPasswordRequestValidator.Password)
 	user.Update(user)
 	common.RenderResponse(c, http.StatusOK, nil, nil)
 }
