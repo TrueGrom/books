@@ -22,6 +22,10 @@ func GenToken(id uint) string {
 	return token
 }
 
+func KeyFunc(token *jwt.Token) (interface{}, error) {
+	return []byte(NBSecretPassword), nil
+}
+
 func Bind(c *gin.Context, obj interface{}) error {
 	b := binding.Default(c.Request.Method, c.ContentType())
 	return c.ShouldBindWith(obj, b)

@@ -61,6 +61,10 @@
 			"versionExact": "v1.3.0"
 		},
 		{
+			"path": "github.com/go-gomail/gomail/tree/v2",
+			"revision": ""
+		},
+		{
 			"checksumSHA1": "CbzNfOvaT1G3G9WILmsyjYfYTO0=",
 			"path": "github.com/golang/protobuf/proto",
 			"revision": "b27b920f9e71b439b873b17bf99f56467623814a",
