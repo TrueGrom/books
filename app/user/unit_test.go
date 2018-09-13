@@ -60,37 +60,76 @@ func TestUserSignUp(t *testing.T) {
 
 	r := gin.New()
 	UsersRegister(r.Group("/user"))
-	req := request{
-		func(req *http.Request) {
-			common.TestDBFree(test_db)
-			test_db = common.TestDBInit()
-			test_db.AutoMigrate(&UserModel{})
+	var unauthRequestTests = []request{
+		{
+			func(req *http.Request) {
+				common.TestDBFree(test_db)
+				test_db = common.TestDBInit()
+				test_db.AutoMigrate(&UserModel{})
+			},
+			"/user/",
+			"POST",
+			`{"username": "wangzitian0","email": "wzt@gg.cn","password": "jakejxke"}`,
+			http.StatusCreated,
+			`{"data":.*,"success":true}`,
+			"valid data and should return StatusCreated",
 		},
-		"/user/",
-		"POST",
-		`{"username": "wangzitian0","email": "wzt@gg.cn","password": "jakejxke"}`,
-		http.StatusCreated,
-		`{"data":.*,"success":true}`,
-		"valid data and should return StatusCreated",
+		{
+			func(req *http.Request) {},
+			"/user/",
+			"POST",
+			`{"username": "wangzitian0","email": "wzt@gg.cn","password": "jakejxke"}`,
+			http.StatusUnprocessableEntity,
+			`{.*"success":false.*}`,
+			"duplicated data and should return StatusUnprocessableEntity",
+		},
+		{
+			func(req *http.Request) {},
+			"/user/",
+			"POST",
+			`{"username": "u","email": "wzt@gg.cn","password": "jakejxke"}`,
+			http.StatusUnprocessableEntity,
+			`{.*"success":false.*}`,
+			"too short username should return error",
+		},
+		{
+			func(req *http.Request) {},
+			"/user/",
+			"POST",
+			`{"username": "wangzitian0","email": "wzt@gg.cn","password": "j"}`,
+			http.StatusUnprocessableEntity,
+			`{.*"success":false.*}`,
+			"too short password should return error",
+		},
+		{
+			func(req *http.Request) {},
+			"/user/",
+			"POST",
+			`{"username": "wangzitian0","email": "wztgg.cn","password": "jakejxke"}`,
+			http.StatusUnprocessableEntity,
+			`{"Email":"{key: email}","success":false}`,
+			"email invalid should return error",
+		},
 	}
-	bodyData := req.bodyData
-	req_serv, err := http.NewRequest(req.method, req.url, bytes.NewBufferString(bodyData))
-	req_serv.Header.Set("Content-Type", "application/json")
-	asserts.NoError(err)
+	for _, req := range unauthRequestTests {
+		bodyData := req.bodyData
+		req_serv, err := http.NewRequest(req.method, req.url, bytes.NewBufferString(bodyData))
+		req_serv.Header.Set("Content-Type", "application/json")
+		asserts.NoError(err)
 
-	req.init(req_serv)
+		req.init(req_serv)
 
-	w := httptest.NewRecorder()
-	r.ServeHTTP(w, req_serv)
+		w := httptest.NewRecorder()
+		r.ServeHTTP(w, req_serv)
 
-	asserts.Equal(req.expectedCode, w.Code, "Response Status - "+req.msg)
-	asserts.Regexp(req.responseRegexg, w.Body.String(), "Response Content - "+req.msg)
+		asserts.Equal(req.expectedCode, w.Code, "Response Status - "+req.msg)
+		asserts.Regexp(req.responseRegexg, w.Body.String(), "Response Content - "+req.msg)
+	}
 }
 
 func TestUserModel(t *testing.T) {
 	asserts := assert.New(t)
 
-	//Testing UserModel's password feature
 	userModel := newUserModel()
 	err := userModel.checkPassword("")
 	asserts.Error(err, "empty password should return err")
