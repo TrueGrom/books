@@ -1,6 +1,7 @@
 package main
 
 import (
+	"books-backend/app/book"
 	"books-backend/app/common"
 	"books-backend/app/user"
 	"github.com/gin-gonic/gin"
@@ -18,6 +19,13 @@ func main() {
 	Migrate(db)
 	defer db.Close()
 
+	//books, err := book.FindBooksByTitle("тест", 20)
+	//if err != nil {
+	//	fmt.Println(err)
+	//} else {
+	//	fmt.Println(books)
+	//}
+
 	r := gin.Default()
 	r.Use(common.CORSMiddleware())
 
@@ -26,6 +34,9 @@ func main() {
 	userGroup := v1.Group("users/")
 	user.UsersRegister(userGroup)
 	user.UsersModify(userGroup)
+
+	bookGroup := v1.Group("books/")
+	book.BooksRegister(bookGroup)
 
 	r.Run()
 }
