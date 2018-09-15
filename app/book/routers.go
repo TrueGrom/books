@@ -7,7 +7,7 @@ import (
 )
 
 func BooksRegister(router *gin.RouterGroup) {
-	router.POST("/search", SearchBooks)
+	router.GET("/search", SearchBooks)
 }
 
 func SearchBooks(c *gin.Context) {
@@ -16,7 +16,7 @@ func SearchBooks(c *gin.Context) {
 		common.RenderResponse(c, http.StatusUnprocessableEntity, common.NewValidatorError(err), nil)
 		return
 	}
-	books, err := FindBooksByTitle(searchQueryRequestValidator.Title, 20)
+	books, err := FindBooksByTitle(searchQueryRequestValidator.Q, 20)
 	if err != nil {
 		common.RenderResponse(c,
 			http.StatusBadRequest,

@@ -6,7 +6,8 @@ import (
 )
 
 type SearchQueryRequestValidator struct {
-	Title string `json:"title" binding:"min=3,max=5000"`
+	//Title string `json:"title" binding:"min=3,max=5000"`
+	Q string `form:"q"`
 }
 
 func (self *SearchQueryRequestValidator) Bind(c *gin.Context) error {
