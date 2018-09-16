@@ -11,6 +11,7 @@ func UsersRegister(router *gin.RouterGroup) {
 	router.POST("/login", LoginUser)
 	router.POST("/forget_password", ForgetPassword)
 	router.POST("/reset_forget_password", GetNewPassword)
+	router.PUT("/add_book", JWTAuthorization(), AddBookToUser)
 }
 
 func UsersModify(router *gin.RouterGroup) {
@@ -114,5 +115,17 @@ func GetNewPassword(c *gin.Context) {
 	}
 	user.setPassword(getNewPasswordRequestValidator.Password)
 	user.Update(user)
+	common.RenderResponse(c, http.StatusOK, nil, nil)
+}
+
+func AddBookToUser(c *gin.Context) {
+	addBookToUserRequestValidator := NewAddBookToUserRequestValidator()
+	if err := addBookToUserRequestValidator.Bind(c); err != nil {
+		common.RenderResponse(c, http.StatusUnprocessableEntity, common.NewValidatorError(err), nil)
+		return
+	}
+	userInt, _ := c.Get("user")
+	user, _ := userInt.(UserModel)
+	user.AddBookToUser(addBookToUserRequestValidator.BookId)
 	common.RenderResponse(c, http.StatusOK, nil, nil)
 }

@@ -1,6 +1,7 @@
 package user
 
 import (
+	"books-backend/app/book"
 	"books-backend/app/common"
 	"errors"
 	"golang.org/x/crypto/bcrypt"
@@ -9,12 +10,13 @@ import (
 const cost = 7
 
 type UserModel struct {
-	ID           uint    `gorm:"primary_key"`
-	Username     string  `gorm:"column:username;unique_index"`
-	Email        string  `gorm:"column:email;unique_index"`
-	Bio          string  `gorm:"column:bio;size:1024"`
-	Image        *string `gorm:"column:image"`
-	PasswordHash string  `gorm:"column:password;not null"`
+	ID           uint             `gorm:"primary_key"`
+	Username     string           `gorm:"column:username;unique_index"`
+	Email        string           `gorm:"column:email;unique_index"`
+	Bio          string           `gorm:"column:bio;size:1024"`
+	Image        *string          `gorm:"column:image"`
+	PasswordHash string           `gorm:"column:password;not null"`
+	Books        []book.BookModel `gorm:"many2many:user_books;foreignkey:ID;association_foreignkey:ID;"`
 }
 
 func AutoMigrate() {
@@ -55,4 +57,9 @@ func (model *UserModel) Update(data interface{}) error {
 	db := common.GetDB()
 	err := db.Model(model).Update(data).Error
 	return err
+}
+
+func (model *UserModel) AddBookToUser(bookId int) {
+	db := common.GetDB()
+	db.Model(model).Association("Books").Append(book.BookModel{ID: uint(bookId)})
 }
