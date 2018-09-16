@@ -59,7 +59,12 @@ func (model *UserModel) Update(data interface{}) error {
 	return err
 }
 
-func (model *UserModel) AddBookToUser(bookId int) {
+func (model *UserModel) AddBookToUser(bookId uint) {
 	db := common.GetDB()
-	db.Model(model).Association("Books").Append(book.BookModel{ID: uint(bookId)})
+	db.Model(model).Association("Books").Append(book.BookModel{ID: bookId})
+}
+
+func (model *UserModel) DeleteBookToUser(bookId uint) {
+	db := common.GetDB()
+	db.Model(model).Association("Books").Delete(book.BookModel{ID: bookId})
 }

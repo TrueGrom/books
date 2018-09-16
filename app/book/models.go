@@ -43,3 +43,13 @@ func FindBooksByTitle(title string, limit rune) ([]BookModel, error) {
 	}
 	return books, err
 }
+
+func IsExist(condition interface{}) bool {
+	db := common.GetDB()
+	var model BookModel
+	err := db.Where(condition).First(&model).Error
+	if err != nil {
+		return false
+	}
+	return true
+}
