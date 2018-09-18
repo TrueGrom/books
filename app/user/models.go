@@ -59,12 +59,15 @@ func (model *UserModel) Update(data interface{}) error {
 	return err
 }
 
-func (model *UserModel) AddBookToUser(bookId uint) {
+func (user *UserModel) AddBookToUser(bookId uint) error {
 	db := common.GetDB()
-	db.Model(model).Association("Books").Append(book.BookModel{ID: bookId})
+	err := db.Model(user).Association("Books").Append(book.BookModel{ID: bookId}).Error
+	//err := db.Exec(fmt.Sprintf("INSERT INTO books_user_models(user_model_id, book_model_id) VALUES (%d, %d);", user.ID, bookId)).Error
+	return err
 }
 
-func (model *UserModel) DeleteBookToUser(bookId uint) {
+func (user *UserModel) DeleteBookToUser(bookId uint) error {
 	db := common.GetDB()
-	db.Model(model).Association("Books").Delete(book.BookModel{ID: bookId})
+	err := db.Model(user).Association("Books").Delete(book.BookModel{ID: bookId}).Error
+	return err
 }
