@@ -20,7 +20,7 @@ func main() {
 	defer db.Close()
 
 	//user1, _ := user.FindOneUser(user.UserModel{ID: 5})
-	//user1.AddBookToUser(2)
+	//user1.AddBooksToUser(2)
 
 	//books, err := book.FindBooksByTitle("тест", 20)
 	//if err != nil {

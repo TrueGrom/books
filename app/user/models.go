@@ -59,15 +59,30 @@ func (model *UserModel) Update(data interface{}) error {
 	return err
 }
 
-func (user *UserModel) AddBookToUser(bookId uint) error {
+func (user *UserModel) AddBooksToUser(booksID []uint) error {
 	db := common.GetDB()
-	err := db.Model(user).Association("Books").Append(book.BookModel{ID: bookId}).Error
-	//err := db.Exec(fmt.Sprintf("INSERT INTO books_user_models(user_model_id, book_model_id) VALUES (%d, %d);", user.ID, bookId)).Error
+	books := make([]book.BookModel, len(booksID))
+	for i, id := range booksID {
+		books[i].ID = id
+	}
+	err := db.Model(user).Association("Books").Append(books).Error
+	//err := db.Exec(fmt.Sprintf("INSERT INTO books_user_models(user_model_id, book_model_id) VALUES (%d, %d);", user.ID, booksID)).Error
 	return err
 }
 
-func (user *UserModel) DeleteBookToUser(bookId uint) error {
+func (user *UserModel) DeleteBooksToUser(booksID []uint) error {
 	db := common.GetDB()
-	err := db.Model(user).Association("Books").Delete(book.BookModel{ID: bookId}).Error
+	books := make([]book.BookModel, len(booksID))
+	for i, id := range booksID {
+		books[i].ID = id
+	}
+	err := db.Model(user).Association("Books").Delete(books).Error
 	return err
+}
+
+func (user *UserModel) GetAllBooksFromUser() ([]book.BookModel, error) {
+	db := common.GetDB()
+	books := []book.BookModel{}
+	err := db.Model(user).Association("Books").Find(&books).Error
+	return books, err
 }
