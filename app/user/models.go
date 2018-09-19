@@ -16,7 +16,7 @@ type UserModel struct {
 	Bio          string           `gorm:"column:bio;size:1024"`
 	Image        *string          `gorm:"column:image"`
 	PasswordHash string           `gorm:"column:password;not null"`
-	Books        []book.BookModel `gorm:"many2many:user_books;foreignkey:ID;association_foreignkey:ID;"`
+	Books        []book.BookModel `gorm:"many2many:books_users_models;foreignkey:ID;association_foreignkey:ID;"`
 }
 
 func AutoMigrate() {
