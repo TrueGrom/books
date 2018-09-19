@@ -16,7 +16,7 @@ func Migrate(db *gorm.DB) {
 func main() {
 
 	db := common.Init()
-	Migrate(db)
+	//Migrate(db)
 	defer db.Close()
 
 	//user1, _ := user.FindOneUser(user.UserModel{ID: 5})
