@@ -111,3 +111,7 @@ CREATE TABLE books_user_models (
 
 CREATE UNIQUE INDEX IF NOT EXISTS uix_books_user_models_user_id_book_id
   ON books_user_models (user_model_id, book_model_id);
+
+
+CREATE INDEX books_user_models_index_user_id ON public.books_user_models (user_model_id);
+CREATE INDEX books_user_models_index_book_id ON public.books_user_models (book_model_id);

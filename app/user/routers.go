@@ -1,7 +1,6 @@
 package user
 
 import (
-	"books-backend/app/book"
 	"books-backend/app/common"
 	"github.com/gin-gonic/gin"
 	"net/http"
@@ -12,8 +11,8 @@ func UsersRegister(router *gin.RouterGroup) {
 	router.POST("/login", LoginUser)
 	router.POST("/forget_password", ForgetPassword)
 	router.POST("/reset_forget_password", GetNewPassword)
-	router.PUT("/add_book", JWTAuthorization(), AddBookToUser)
-	router.DELETE("/del_book", JWTAuthorization(), DeleteBookFromUser)
+	router.POST("/books", JWTAuthorization(), AddBookToUser)
+	router.DELETE("/books", JWTAuthorization(), DeleteBookFromUser)
 }
 
 func UsersModify(router *gin.RouterGroup) {
@@ -126,10 +125,10 @@ func AddBookToUser(c *gin.Context) {
 		common.RenderResponse(c, http.StatusUnprocessableEntity, common.NewValidatorError(err), nil)
 		return
 	}
-	if !book.IsExist(book.BookModel{ID: addBookToUserRequestValidator.BookId}) {
-		common.RenderResponse(c, http.StatusUnprocessableEntity, common.CommonError{gin.H{"errors": gin.H{"book_id": "Book not found"}}}, nil)
-		return
-	}
+	//if !book.IsExist(book.BookModel{ID: addBookToUserRequestValidator.BookId}) {
+	//	common.RenderResponse(c, http.StatusUnprocessableEntity, common.CommonError{gin.H{"errors": gin.H{"book_id": "Book not found"}}}, nil)
+	//	return
+	//}
 	userInt, _ := c.Get("user")
 	user, _ := userInt.(UserModel)
 	user.AddBookToUser(addBookToUserRequestValidator.BookId)
