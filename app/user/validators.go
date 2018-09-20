@@ -108,7 +108,7 @@ func NewGetNewPasswordRequestValidator() GetNewPasswordRequestValidator {
 }
 
 type AddBookToUserRequestValidator struct {
-	BookId []uint `json:"book_id" binding:"required"`
+	BookId []uint `json:"book_id" binding:"required,dive,min=1,numeric"`
 }
 
 func (self *AddBookToUserRequestValidator) Bind(c *gin.Context) error {
@@ -122,4 +122,26 @@ func (self *AddBookToUserRequestValidator) Bind(c *gin.Context) error {
 func NewAddBookToUserRequestValidator() AddBookToUserRequestValidator {
 	addBookToUserRequestValidator := AddBookToUserRequestValidator{}
 	return addBookToUserRequestValidator
+}
+
+type BookRating struct {
+	Book_id uint `json:"book_id"`
+	Rating  int8 `json:"rating"`
+}
+
+type AddRatingToBooksRequestValidator struct {
+	Books []BookRating `json:"books" binding:"required"`
+}
+
+func (self *AddRatingToBooksRequestValidator) Bind(c *gin.Context) error {
+	err := common.Bind(c, self)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+func NewAddRatingToBooksRequestValidator() AddRatingToBooksRequestValidator {
+	addRatingToBooksRequestValidator := AddRatingToBooksRequestValidator{}
+	return addRatingToBooksRequestValidator
 }

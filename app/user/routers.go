@@ -14,6 +14,7 @@ func UsersRegister(router *gin.RouterGroup) {
 	router.POST("/books", JWTAuthorization(), AddBookToUser)
 	router.DELETE("/books", JWTAuthorization(), DeleteBookFromUser)
 	router.GET("/books", JWTAuthorization(), GetBooks)
+	router.POST("/books/rating", JWTAuthorization(), AddRating)
 
 }
 
@@ -163,3 +164,19 @@ func GetBooks(c *gin.Context) {
 	}
 	common.RenderResponse(c, http.StatusOK, nil, books)
 }
+
+func AddRating(c *gin.Context) {
+	addRatingToBooksRequestValidator := NewAddRatingToBooksRequestValidator()
+	if err := addRatingToBooksRequestValidator.Bind(c); err != nil {
+		common.RenderResponse(c, http.StatusUnprocessableEntity, common.NewValidatorError(err), nil)
+		return
+	}
+	userAuth, _ := c.Get("user")
+	user, _ := userAuth.(UserModel)
+	err := AddRatingToBook(&user, addRatingToBooksRequestValidator.Books)
+	if err != nil {
+		return
+	}
+	common.RenderResponse(c, http.StatusOK, nil, nil)
+}
+
