@@ -30,6 +30,8 @@ func Init() *gorm.DB {
 		fmt.Println("db err: ", err)
 	}
 	db.DB().SetMaxIdleConns(10)
+	db.DB().SetMaxOpenConns(10)
+	db.LogMode(true)
 	DB = db
 	return DB
 }
