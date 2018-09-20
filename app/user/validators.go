@@ -108,7 +108,7 @@ func NewGetNewPasswordRequestValidator() GetNewPasswordRequestValidator {
 }
 
 type AddBookToUserRequestValidator struct {
-	BookId []uint `json:"book_id" binding:"required"`
+	BookId []uint `json:"book_id" binding:"required,dive,min=1"`
 }
 
 func (self *AddBookToUserRequestValidator) Bind(c *gin.Context) error {

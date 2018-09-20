@@ -5,6 +5,7 @@ import (
 	"books-backend/app/common"
 	"errors"
 	"golang.org/x/crypto/bcrypt"
+	"database/sql/driver"
 )
 
 const cost = 7
@@ -18,6 +19,23 @@ type UserModel struct {
 	PasswordHash string           `gorm:"column:password;not null"`
 	Books        []book.BookModel `gorm:"many2many:books_users_models;foreignkey:ID;association_foreignkey:ID;"`
 }
+
+type BookStatus string
+
+const (
+	NotRead   BookStatus = "Not Read"
+	IsReading BookStatus = "Reading"
+)
+
+type BooksToUsers struct {
+	User_id uint `gorm:"column:user_model_id"`
+	Book_id uint `gorm:"column:book_model_id"`
+	Rating  int8 `gorm:"column:rating"`
+	//Status BookStatus `sql:"type:ENUM('Not Read', 'Reading')"`
+}
+
+func (u *BookStatus) Scan(value interface{}) error { *u = BookStatus(value.([]byte)); return nil }
+func (u BookStatus) Value() (driver.Value, error)  { return string(u), nil }
 
 func AutoMigrate() {
 	db := common.GetDB()
