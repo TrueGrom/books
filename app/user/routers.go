@@ -13,6 +13,9 @@ func UsersRegister(router *gin.RouterGroup) {
 	router.POST("/reset_forget_password", GetNewPassword)
 	router.POST("/books", JWTAuthorization(), AddBookToUser)
 	router.DELETE("/books", JWTAuthorization(), DeleteBookFromUser)
+	router.GET("/books", JWTAuthorization(), GetBooks)
+	router.POST("/books/rating", JWTAuthorization(), AddRating)
+
 }
 
 func UsersModify(router *gin.RouterGroup) {
@@ -131,7 +134,7 @@ func AddBookToUser(c *gin.Context) {
 	//}
 	userInt, _ := c.Get("user")
 	user, _ := userInt.(UserModel)
-	user.AddBookToUser(addBookToUserRequestValidator.BookId)
+	user.AddBooksToUser(addBookToUserRequestValidator.BookId)
 	common.RenderResponse(c, http.StatusOK, nil, nil)
 }
 
@@ -145,8 +148,35 @@ func DeleteBookFromUser(c *gin.Context) {
 	//	common.RenderResponse(c, http.StatusUnprocessableEntity, common.CommonError{gin.H{"errors":gin.H{"book_id":"Book not found"}}}, nil)
 	//	return
 	//}
+
 	userInt, _ := c.Get("user")
 	user, _ := userInt.(UserModel)
-	user.DeleteBookToUser(addBookToUserRequestValidator.BookId)
+	user.DeleteBooksToUser(addBookToUserRequestValidator.BookId)
 	common.RenderResponse(c, http.StatusOK, nil, nil)
 }
+
+func GetBooks(c *gin.Context) {
+	userAuth, _ := c.Get("user")
+	user, _ := userAuth.(UserModel)
+	books, err := user.GetAllBooksFromUser()
+	if err != nil {
+		return
+	}
+	common.RenderResponse(c, http.StatusOK, nil, books)
+}
+
+func AddRating(c *gin.Context) {
+	addRatingToBooksRequestValidator := NewAddRatingToBooksRequestValidator()
+	if err := addRatingToBooksRequestValidator.Bind(c); err != nil {
+		common.RenderResponse(c, http.StatusUnprocessableEntity, common.NewValidatorError(err), nil)
+		return
+	}
+	userAuth, _ := c.Get("user")
+	user, _ := userAuth.(UserModel)
+	err := AddRatingToBook(&user, addRatingToBooksRequestValidator.Books)
+	if err != nil {
+		return
+	}
+	common.RenderResponse(c, http.StatusOK, nil, nil)
+}
+

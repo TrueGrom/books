@@ -1,0 +1,1 @@
+ALTER TABLE books_users_models ADD rating INTEGER;
