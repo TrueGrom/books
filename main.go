@@ -7,6 +7,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/jinzhu/gorm"
 	_ "github.com/jinzhu/gorm/dialects/postgres"
+	"books-backend/app/comment"
 )
 
 func Migrate(db *gorm.DB) {
@@ -18,16 +19,7 @@ func main() {
 	db := common.Init()
 	//Migrate(db)
 	defer db.Close()
-
-	//user1, _ := user.FindOneUser(user.UserModel{ID: 5})
-	//user1.AddBooksToUser(2)
-
-	//books, err := book.FindBooksByTitle("тест", 20)
-	//if err != nil {
-	//	fmt.Println(err)
-	//} else {
-	//	fmt.Println(books)
-	//}
+	db.AutoMigrate(&comment.CommentModel{})
 
 	r := gin.Default()
 	r.Use(common.CORSMiddleware())
