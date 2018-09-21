@@ -15,7 +15,6 @@ func UsersRegister(router *gin.RouterGroup) {
 	router.DELETE("/books", JWTAuthorization(), DeleteBookFromUser)
 	router.GET("/books", JWTAuthorization(), GetBooks)
 	router.POST("/books/rating", JWTAuthorization(), AddRating)
-
 }
 
 func UsersModify(router *gin.RouterGroup) {
@@ -28,11 +27,13 @@ func UserSighup(c *gin.Context) {
 		common.RenderResponse(c, http.StatusUnprocessableEntity, common.NewValidatorError(err), nil)
 		return
 	}
-	if err := SaveOne(&userModelValidator.userModel); err != nil {
+	user, err := SaveOne(userModelValidator.userModel)
+	if err != nil {
 		common.RenderResponse(c, http.StatusUnprocessableEntity, common.NewError("database", err), nil)
 		return
 	}
-	common.RenderResponse(c, http.StatusCreated, nil, nil)
+	token := common.GenToken(user.ID)
+	common.RenderResponse(c, http.StatusCreated, nil, gin.H{"token": token})
 }
 
 func LoginUser(c *gin.Context) {
@@ -179,4 +180,3 @@ func AddRating(c *gin.Context) {
 	}
 	common.RenderResponse(c, http.StatusOK, nil, nil)
 }
-

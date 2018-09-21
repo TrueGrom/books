@@ -3,9 +3,9 @@ package user
 import (
 	"books-backend/app/book"
 	"books-backend/app/common"
+	"database/sql/driver"
 	"errors"
 	"golang.org/x/crypto/bcrypt"
-	"database/sql/driver"
 )
 
 const cost = 7
@@ -69,10 +69,11 @@ func FindOneUser(condition interface{}) (UserModel, error) {
 	return model, err
 }
 
-func SaveOne(data interface{}) error {
+func SaveOne(data interface{}) (UserModel, error) {
 	db := common.GetDB()
-	err := db.Save(data).Error
-	return err
+	user := data.(UserModel)
+	err := db.Create(&user).Error
+	return user, err
 }
 
 func (model *UserModel) Update(data interface{}) error {
