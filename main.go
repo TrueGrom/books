@@ -2,12 +2,12 @@ package main
 
 import (
 	"books-backend/app/book"
+	"books-backend/app/comment"
 	"books-backend/app/common"
 	"books-backend/app/user"
 	"github.com/gin-gonic/gin"
 	"github.com/jinzhu/gorm"
 	_ "github.com/jinzhu/gorm/dialects/postgres"
-	"books-backend/app/comment"
 )
 
 func Migrate(db *gorm.DB) {
@@ -15,11 +15,8 @@ func Migrate(db *gorm.DB) {
 }
 
 func main() {
-
 	db := common.Init()
-	//Migrate(db)
 	defer db.Close()
-	db.AutoMigrate(&comment.CommentModel{})
 
 	r := gin.Default()
 	r.Use(common.CORSMiddleware())
@@ -32,6 +29,9 @@ func main() {
 
 	bookGroup := v1.Group("books/")
 	book.BooksRegister(bookGroup)
+
+	commentGroup := v1.Group("comments/")
+	comment.CommentsRegister(commentGroup)
 
 	r.Run()
 }
