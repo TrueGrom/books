@@ -128,10 +128,6 @@ func AddBookToUser(c *gin.Context) {
 		common.RenderResponse(c, http.StatusUnprocessableEntity, common.NewValidatorError(err), nil)
 		return
 	}
-	//if !book.IsExist(book.BookModel{ID: addBookToUserRequestValidator.BookId}) {
-	//	common.RenderResponse(c, http.StatusUnprocessableEntity, common.CommonError{gin.H{"errors": gin.H{"book_id": "Book not found"}}}, nil)
-	//	return
-	//}
 	userInt, _ := c.Get("user")
 	user, _ := userInt.(UserModel)
 	user.AddBooksToUser(addBookToUserRequestValidator.BookId)
@@ -144,11 +140,6 @@ func DeleteBookFromUser(c *gin.Context) {
 		common.RenderResponse(c, http.StatusUnprocessableEntity, common.NewValidatorError(err), nil)
 		return
 	}
-	//if !book.IsExist(book.BookModel{ID:addBookToUserRequestValidator.BookId}) {
-	//	common.RenderResponse(c, http.StatusUnprocessableEntity, common.CommonError{gin.H{"errors":gin.H{"book_id":"Book not found"}}}, nil)
-	//	return
-	//}
-
 	userInt, _ := c.Get("user")
 	user, _ := userInt.(UserModel)
 	user.DeleteBooksToUser(addBookToUserRequestValidator.BookId)
