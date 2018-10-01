@@ -9,14 +9,14 @@ import (
 )
 
 type CommentModel struct {
-	ID        uint           `gorm:"column:id"`
-	CreatedAt time.Time      `gorm:"column:created_at"`
-	UpdatedAt time.Time      `gorm:"column:updated_at"`
-	Text      string         `gorm:"column:text"`
-	UserId    uint           `gorm:"column:user_id"`
-	User      user.UserModel `gorm:"foreignkey:ID;association_foreignkey:UserId"`
-	BookId    uint           `gorm:"column:book_id"`
-	Book      book.BookModel `gorm:"foreignkey:ID;association_foreignkey:BookId"`
+	ID        uint           `json:"id" gorm:"column:id"`
+	CreatedAt time.Time      `json:"created_at" gorm:"column:created_at"`
+	UpdatedAt time.Time      `json:"updated_at" gorm:"column:updated_at"`
+	Text      string         `json:"text" gorm:"column:text"`
+	UserId    uint           `json:"user_id" gorm:"column:user_id"`
+	User      user.UserModel `json:"-" gorm:"foreignkey:ID;association_foreignkey:UserId"`
+	BookId    uint           `json:"book_id" gorm:"column:book_id"`
+	Book      book.BookModel `json:"-" gorm:"foreignkey:ID;association_foreignkey:BookId"`
 }
 
 func FindOneComment(condition interface{}) (CommentModel, error) {
@@ -25,6 +25,14 @@ func FindOneComment(condition interface{}) (CommentModel, error) {
 	err := db.Where(condition).First(&model).Error
 	return model, err
 }
+
+func FindManyComments(condition interface{}) ([]CommentModel, error) {
+	db := common.GetDB()
+	comments := []CommentModel{}
+	err := db.Where(condition).Find(&comments).Error
+	return comments, err
+}
+
 
 func SaveOne(data interface{}) error {
 	db := common.GetDB()
@@ -38,3 +46,4 @@ func DeleteOneComment(comment CommentModel, date time.Time) (int64, error) {
 	q := db.Delete(&comment, str)
 	return q.RowsAffected, q.Error
 }
+

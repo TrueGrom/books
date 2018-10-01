@@ -5,6 +5,7 @@ import (
 	"books-backend/app/user"
 	"github.com/gin-gonic/gin"
 	"net/http"
+	"strconv"
 	"time"
 )
 
@@ -12,6 +13,7 @@ func CommentsRegister(router *gin.RouterGroup) {
 	router.POST("/books", user.JWTAuthorization(), AddCommentToBook)
 	router.DELETE("books", user.JWTAuthorization(), DeleteCommentFromBook)
 	router.PATCH("/books")
+	router.GET("/books/:bookid", GetAllComment)
 }
 
 func AddCommentToBook(c *gin.Context) {
@@ -53,4 +55,19 @@ func DeleteCommentFromBook(c *gin.Context) {
 		return
 	}
 	common.RenderResponse(c, http.StatusOK, nil, nil)
+}
+
+
+func GetAllComment(c *gin.Context) {
+	bookid, err := strconv.ParseUint(c.Param("bookid"), 10, 64)
+	if err != nil {
+		common.RenderResponse(c, http.StatusUnprocessableEntity, common.CommonError{gin.H{"errors": "bookid is not integer"}}, nil)
+		return
+	}
+	comments, err := FindManyComments(CommentModel{BookId:uint(bookid)})
+	if err != nil {
+		common.RenderResponse(c, http.StatusUnprocessableEntity, common.CommonError{gin.H{"errors": "Cannot fetch data"}}, nil)
+		return
+	}
+	common.RenderResponse(c, http.StatusOK, nil, comments)
 }

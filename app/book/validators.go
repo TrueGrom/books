@@ -6,7 +6,6 @@ import (
 )
 
 type SearchQueryRequestValidator struct {
-	//Title string `json:"title" binding:"min=3,max=5000"`
 	Q string `form:"q" binding:"min=3,max=5000,required"`
 }
 
