@@ -6,8 +6,10 @@ import (
 	"books-backend/app/common"
 	"books-backend/app/user"
 	"github.com/gin-gonic/gin"
+	_ "github.com/golang-migrate/migrate/source/file"
+
 	"github.com/jinzhu/gorm"
-	_ "github.com/jinzhu/gorm/dialects/postgres"
+	_ "github.com/lib/pq"
 )
 
 func Migrate(db *gorm.DB) {
