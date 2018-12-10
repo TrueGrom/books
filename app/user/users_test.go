@@ -63,9 +63,9 @@ func bookModelMocker(n int) []book.BookModel {
 	var ret []book.BookModel
 	for i := offset + 1; i <= offset+n; i++ {
 		bookModel := book.BookModel{
-			Authors: pq.StringArray{fmt.Sprintf("author%v", i)},
-			Title:   fmt.Sprintf("title%v", i),
-			UrlId: uint64(i),
+			Authors:   pq.StringArray{fmt.Sprintf("author%v", i)},
+			Title:     fmt.Sprintf("title%v", i),
+			UrlId:     uint64(i),
 			ImageFile: fmt.Sprintf("image_file%v", i),
 		}
 		err := test_db.Create(&bookModel)
@@ -76,9 +76,11 @@ func bookModelMocker(n int) []book.BookModel {
 }
 
 func HeaderTokenMock(req *http.Request, u uint) {
-	token := common.GenToken(u)
-	fmt.Println(token)
 	req.Header.Set("Authorization", fmt.Sprintf("JWT %v", common.GenToken(u)))
+}
+
+func HeaderSetTokenMock(req *http.Request, token string) {
+	req.Header.Set("Authorization", token)
 }
 
 func TestUserSignUp(t *testing.T) {
@@ -265,7 +267,6 @@ func TestUserAddBooks(t *testing.T) {
 		{
 			func(req *http.Request) {
 				user, _ := FindOneUser(UserModel{Username: "user1"})
-				fmt.Println(user)
 				HeaderTokenMock(req, user.ID)
 			},
 			"/user/books", "POST",
@@ -274,24 +275,110 @@ func TestUserAddBooks(t *testing.T) {
 			`{.*"success":true.*}`,
 			"add books and should return StatusOK",
 		},
-		//{
-		//	func(req *http.Request) {},
-		//	"/user/login",
-		//	"POST",
-		//	`{"username": "wangzitian0", "password": "wrongpassword"}`,
-		//	http.StatusForbidden,
-		//	`{.*"success":false.*}`,
-		//	"wrong password  and should return StatusForbidden",
-		//},
-		//{
-		//	func(req *http.Request) {},
-		//	"/user/login",
-		//	"POST",
-		//	`{"usernakl;kme": "wangzitian0", "passwokkkkrd": "wrongpassword"}`,
-		//	http.StatusUnprocessableEntity,
-		//	`{.*"success":false.*}`,
-		//	"wrong password  and should return StatusUnprocessableEntity",
-		//},
+		{
+			func(req *http.Request) {
+				user, _ := FindOneUser(UserModel{Username: "user1"})
+				HeaderTokenMock(req, user.ID)
+			},
+			"/user/books/rating", "POST",
+			`{"books": [{"book_id": 1,"rating": 2}]}`,
+			http.StatusOK,
+			`{.*"success":true.*}`,
+			"add rating to books and should return StatusOK",
+		},
+		{
+			func(req *http.Request) {
+				user, _ := FindOneUser(UserModel{Username: "user1"})
+				HeaderTokenMock(req, user.ID)
+			},
+			"/user/books/rating", "POST",
+			`{"book1s": [{"book_id": 1,"rating": 2}]}`,
+			http.StatusUnprocessableEntity,
+			`{.*"success":false.*}`,
+			"add rating to books and should return StatusOK",
+		},
+		{
+			func(req *http.Request) {
+				user, _ := FindOneUser(UserModel{Username: "user1"})
+				HeaderTokenMock(req, user.ID)
+			},
+			"/user/books", "DELETE",
+			`{"book_id": [1,2]}`,
+			http.StatusOK,
+			`{.*"success":true.*}`,
+			"delete books and should return StatusOK",
+		},
+		{
+			func(req *http.Request) {
+				user, _ := FindOneUser(UserModel{Username: "user1"})
+				HeaderTokenMock(req, user.ID)
+			},
+			"/user/books", "DELETE",
+			`{"bo0ok_id": [1,2]}`,
+			http.StatusUnprocessableEntity,
+			`{.*"success":false.*}`,
+			"delete books with invalid field and should return StatusOK",
+		},
+		{
+			func(req *http.Request) {
+				user, _ := FindOneUser(UserModel{Username: "user1"})
+				HeaderTokenMock(req, user.ID)
+			},
+			"/user/books", "GET",
+			`{}`,
+			http.StatusOK,
+			`{.*"success":true.*}`,
+			"get books and should return StatusOK",
+		},
+		{
+			func(req *http.Request) {
+				user, _ := FindOneUser(UserModel{Username: "user1"})
+				HeaderTokenMock(req, user.ID)
+			},
+			"/user/books", "POST",
+			`{"bo1ok_id": [1,2,3,4]}`,
+			http.StatusUnprocessableEntity,
+			`{.*"success":false.*}`,
+			"invalid field post to /books - should return 422",
+		},
+		{
+			func(req *http.Request) {},
+			"/user/books", "POST",
+			`{"book_id": [1,2,3,4]}`,
+			http.StatusBadRequest,
+			`{"message":"Authorization header not provided"}`,
+			"try to add books without Token - should return StatusBadRequest",
+		},
+		{
+			func(req *http.Request) {
+				HeaderSetTokenMock(req, "JWT")
+			},
+			"/user/books", "POST",
+			`{"book_id": [1,2,3,4]}`,
+			http.StatusForbidden,
+			`{"message":"Usage: JWT .*"}`,
+			"add books and should return StatusOK",
+		},
+		{
+			func(req *http.Request) {
+				HeaderSetTokenMock(req, "Bearer token")
+			},
+			"/user/books", "POST",
+			`{"book_id": [1,2,3,4]}`,
+			http.StatusForbidden,
+			`{"message":"Authorization header need to start with 'JWT'"}`,
+			"add books and should return StatusOK",
+		},
+		{
+			func(req *http.Request) {
+				HeaderSetTokenMock(req, "JWT token")
+			},
+			"/user/books", "POST",
+			`{"book_id": [1,2,3,4]}`,
+			http.StatusForbidden,
+			`{"message":"Token is invalid"}`,
+			"add books and should return StatusOK",
+		},
 	}
 	for _, req := range unauthRequestTests {
 		bodyData := req.bodyData
