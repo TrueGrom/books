@@ -237,6 +237,85 @@ func TestUserLogin(t *testing.T) {
 	common.TestDBFree()
 }
 
+func TestUserResetLogin(t *testing.T) {
+	asserts := assert.New(t)
+	test_db = common.TestDBInit()
+
+	r := gin.New()
+	UsersRegister(r.Group("/user"))
+	var unauthRequestTests = []request{
+		{
+			func(req *http.Request) {},
+			"/user/",
+			"POST",
+			`{"username": "wangzitian0","email": "wzt@gg.cn","password": "jakejxke"}`,
+			http.StatusCreated,
+			`{"data":.*,"success":true}`,
+			"create user and should return StatusCreated",
+		},
+		{
+			func(req *http.Request) {},
+			"/user/login",
+			"POST",
+			`{"username": "wangzitian0", "password": "jakejxke"}`,
+			http.StatusOK,
+			`{.*"success":true.*}`,
+			"successfully log in  and should return StatusOK",
+		},
+		{
+			func(req *http.Request) {},
+			"/user/reset_password/wangzitian0",
+			"POST",
+			`{"password": "jakejxke", "new_password": "Qwerty123"}`,
+			http.StatusOK,
+			`{.*"success":true.*}`,
+			"change password and should return StatusOK",
+		},
+		{
+			func(req *http.Request) {},
+			"/user/reset_password/wangzitian0",
+			"POST",
+			`{"passwlokrd": "jakejxke", "new_password": "Qwerty123"}`,
+			http.StatusUnprocessableEntity,
+			`{.*"success":false.*}`,
+			"sent incorrect field should return StatusUnprocessableEntity",
+		},
+		{
+			func(req *http.Request) {},
+			"/user/reset_password/wangzitian",
+			"POST",
+			`{"password": "jakejxke", "new_password": "Qwerty123"}`,
+			http.StatusBadRequest,
+			`{.*"success":false.*}`,
+			"sent username that doesn't exists in DB should return StatusBadRequest",
+		},
+		{
+			func(req *http.Request) {},
+			"/user/reset_password/wangzitian0",
+			"POST",
+			`{"password": "jakejxke", "new_password": "Qwerty123"}`,
+			http.StatusForbidden,
+			`{.*"success":false.*}`,
+			"sent old password should return StatusForbidden",
+		},
+	}
+	for _, req := range unauthRequestTests {
+		bodyData := req.bodyData
+		req_serv, err := http.NewRequest(req.method, req.url, bytes.NewBufferString(bodyData))
+		req_serv.Header.Set("Content-Type", "application/json")
+		asserts.NoError(err)
+
+		req.init(req_serv)
+
+		w := httptest.NewRecorder()
+		r.ServeHTTP(w, req_serv)
+
+		asserts.Equal(req.expectedCode, w.Code, "Response Status - "+req.msg)
+		asserts.Regexp(req.responseRegexg, w.Body.String(), "Response Content - "+req.msg)
+	}
+	common.TestDBFree()
+}
+
 func TestUserAddBooks(t *testing.T) {
 	asserts := assert.New(t)
 	test_db = common.TestDBInit()
@@ -394,7 +473,7 @@ func TestUserAddBooks(t *testing.T) {
 		asserts.Equal(req.expectedCode, w.Code, "Response Status - "+req.msg)
 		asserts.Regexp(req.responseRegexg, w.Body.String(), "Response Content - "+req.msg)
 	}
-	//common.TestDBFree(test_db)
+	common.TestDBFree()
 }
 
 func TestUserModel(t *testing.T) {

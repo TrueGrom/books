@@ -15,10 +15,6 @@ func UsersRegister(router *gin.RouterGroup) {
 	router.DELETE("/books", JWTAuthorization(), DeleteBookFromUser)
 	router.GET("/books", JWTAuthorization(), GetBooks)
 	router.POST("/books/rating", JWTAuthorization(), AddRating)
-
-}
-
-func UsersModify(router *gin.RouterGroup) {
 	router.POST("/reset_password/:username", LoginReset)
 }
 

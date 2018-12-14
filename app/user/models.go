@@ -77,7 +77,7 @@ func SaveOne(data interface{}) error {
 
 func (model *UserModel) Update(data interface{}) error {
 	db := common.GetDB()
-	err := db.Model(model).Update(data).Error
+	err := db.Save(data).Error
 	return err
 }
 

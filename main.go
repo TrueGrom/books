@@ -27,7 +27,7 @@ func main() {
 
 	userGroup := v1.Group("users/")
 	user.UsersRegister(userGroup)
-	user.UsersModify(userGroup)
+	//user.UsersModify(userGroup)
 
 	bookGroup := v1.Group("books/")
 	book.BooksRegister(bookGroup)
