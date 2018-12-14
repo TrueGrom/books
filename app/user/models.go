@@ -1,11 +1,11 @@
 package user
 
 import (
-	"books-backend/app/book"
-	"books-backend/app/common"
+	"books/app/book"
+	"books/app/common"
+	"database/sql/driver"
 	"errors"
 	"golang.org/x/crypto/bcrypt"
-	"database/sql/driver"
 )
 
 const cost = 7

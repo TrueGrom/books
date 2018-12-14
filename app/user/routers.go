@@ -1,7 +1,7 @@
 package user
 
 import (
-	"books-backend/app/common"
+	"books/app/common"
 	"github.com/gin-gonic/gin"
 	"net/http"
 )
@@ -170,4 +170,3 @@ func AddRating(c *gin.Context) {
 	}
 	common.RenderResponse(c, http.StatusOK, nil, nil)
 }
-

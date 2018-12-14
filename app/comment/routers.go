@@ -1,8 +1,8 @@
 package comment
 
 import (
-	"books-backend/app/common"
-	"books-backend/app/user"
+	"books/app/common"
+	"books/app/user"
 	"github.com/gin-gonic/gin"
 	"net/http"
 	"strconv"
@@ -57,14 +57,13 @@ func DeleteCommentFromBook(c *gin.Context) {
 	common.RenderResponse(c, http.StatusOK, nil, nil)
 }
 
-
 func GetAllComment(c *gin.Context) {
 	bookid, err := strconv.ParseUint(c.Param("bookid"), 10, 64)
 	if err != nil {
 		common.RenderResponse(c, http.StatusUnprocessableEntity, common.CommonError{gin.H{"errors": "bookid is not integer"}}, nil)
 		return
 	}
-	comments, err := FindManyComments(CommentModel{BookId:uint(bookid)})
+	comments, err := FindManyComments(CommentModel{BookId: uint(bookid)})
 	if err != nil {
 		common.RenderResponse(c, http.StatusUnprocessableEntity, common.CommonError{gin.H{"errors": "Cannot fetch data"}}, nil)
 		return

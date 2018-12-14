@@ -1,10 +1,10 @@
 package main
 
 import (
-	"books-backend/app/book"
-	"books-backend/app/comment"
-	"books-backend/app/common"
-	"books-backend/app/user"
+	"books/app/book"
+	"books/app/comment"
+	"books/app/common"
+	"books/app/user"
 	"github.com/gin-gonic/gin"
 	_ "github.com/golang-migrate/migrate/source/file"
 

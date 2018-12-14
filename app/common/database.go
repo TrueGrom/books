@@ -1,7 +1,7 @@
 package common
 
 import (
-	"books-backend/app"
+	"books/app"
 	"database/sql"
 	"fmt"
 	"github.com/golang-migrate/migrate"

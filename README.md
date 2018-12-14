@@ -1,4 +1,4 @@
-# books-backend
+# books
 
 For migration we use https://github.com/golang-migrate/migrate/tree/master/cli
 

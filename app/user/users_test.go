@@ -1,8 +1,8 @@
 package user
 
 import (
-	"books-backend/app/book"
-	"books-backend/app/common"
+	"books/app/book"
+	"books/app/common"
 	"bytes"
 	"fmt"
 	"github.com/gin-gonic/gin"

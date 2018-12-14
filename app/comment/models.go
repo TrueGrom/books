@@ -1,9 +1,9 @@
 package comment
 
 import (
-	"books-backend/app/book"
-	"books-backend/app/common"
-	"books-backend/app/user"
+	"books/app/book"
+	"books/app/common"
+	"books/app/user"
 	"fmt"
 	"time"
 )
@@ -33,7 +33,6 @@ func FindManyComments(condition interface{}) ([]CommentModel, error) {
 	return comments, err
 }
 
-
 func SaveOne(data interface{}) error {
 	db := common.GetDB()
 	err := db.Save(data).Error
@@ -46,4 +45,3 @@ func DeleteOneComment(comment CommentModel, date time.Time) (int64, error) {
 	q := db.Delete(&comment, str)
 	return q.RowsAffected, q.Error
 }
-
