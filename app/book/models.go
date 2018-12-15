@@ -2,7 +2,6 @@ package book
 
 import (
 	"books/app/common"
-	"fmt"
 	_ "github.com/jinzhu/gorm/dialects/postgres"
 	"github.com/lib/pq"
 )
@@ -29,9 +28,8 @@ func (BookModel) TableName() string {
 
 func FindBooksByTitle(title string, limit rune) ([]BookModel, error) {
 	db := common.GetDB()
-	var books []BookModel
-	str := fmt.Sprintf("SELECT * FROM  full_text_search('%s', %d);", title, limit)
-	rows, err := db.Raw(str).Rows()
+	rows, err := db.Raw("SELECT * FROM  full_text_search(?, ?);", title, limit).Rows()
+	books := make([]BookModel, 0, limit)
 	if err != nil {
 		return books, err
 	}
@@ -41,7 +39,7 @@ func FindBooksByTitle(title string, limit rune) ([]BookModel, error) {
 		db.ScanRows(rows, &book)
 		books = append(books, book)
 	}
-	return books, err
+	return books, nil
 }
 
 func IsExist(condition interface{}) bool {
