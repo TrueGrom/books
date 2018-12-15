@@ -12,7 +12,7 @@ import (
 func CommentsRegister(router *gin.RouterGroup) {
 	router.POST("/books", user.JWTAuthorization(), AddCommentToBook)
 	router.DELETE("books", user.JWTAuthorization(), DeleteCommentFromBook)
-	router.PATCH("/books")
+	//router.PATCH("/books")
 	router.GET("/books/:bookid", GetAllComment)
 }
 
@@ -33,7 +33,7 @@ func AddCommentToBook(c *gin.Context) {
 			nil)
 		return
 	}
-	common.RenderResponse(c, http.StatusOK, nil, nil)
+	common.RenderResponse(c, http.StatusCreated, nil, nil)
 }
 
 func DeleteCommentFromBook(c *gin.Context) {
