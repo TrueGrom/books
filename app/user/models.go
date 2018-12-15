@@ -41,11 +41,6 @@ func (BooksToUsers) TableName() string {
 func (u *BookStatus) Scan(value interface{}) error { *u = BookStatus(value.([]byte)); return nil }
 func (u BookStatus) Value() (driver.Value, error)  { return string(u), nil }
 
-func AutoMigrate() {
-	db := common.GetDB()
-	db.AutoMigrate(&UserModel{})
-}
-
 func (u *UserModel) setPassword(password string) error {
 	if len(password) == 0 {
 		return errors.New("password should not be empty!")

@@ -51,7 +51,6 @@ func TestDBInit() *gorm.DB {
 		app.DB_USER,
 		app.DB_PASSWORD,
 		"postgres")
-	fmt.Println(connectionString)
 	db, err := sql.Open("postgres", connectionString)
 	if err != nil {
 		panic(err)
@@ -98,7 +97,6 @@ func TestDBFree() error {
 		app.DB_PASSWORD,
 		"postgres")
 	db, err := sql.Open("postgres", connectionString)
-	fmt.Println(err)
 	db.Exec("SELECT pg_terminate_backend(pg_stat_activity.pid) " +
 		"FROM pg_stat_activity " +
 		"WHERE pg_stat_activity.datname = 'test_books' AND pid <> pg_backend_pid();")

@@ -38,7 +38,7 @@ type request struct {
 	msg            string
 }
 
-func userModelMocker(n int) []UserModel {
+func UserModelMocker(n int) []UserModel {
 	var offset int
 	test_db.Model(&UserModel{}).Count(&offset)
 	var ret []UserModel
@@ -57,7 +57,7 @@ func userModelMocker(n int) []UserModel {
 	return ret
 }
 
-func bookModelMocker(n int) []book.BookModel {
+func BookModelMocker(n int) []book.BookModel {
 	var offset int
 	test_db.Model(&book.BookModel{}).Count(&offset)
 	var ret []book.BookModel
@@ -68,8 +68,7 @@ func bookModelMocker(n int) []book.BookModel {
 			UrlId:     uint64(i),
 			ImageFile: fmt.Sprintf("image_file%v", i),
 		}
-		err := test_db.Create(&bookModel)
-		fmt.Println(err)
+		test_db.Create(&bookModel)
 		ret = append(ret, bookModel)
 	}
 	return ret
@@ -87,7 +86,7 @@ func TestUserSignUp(t *testing.T) {
 	asserts := assert.New(t)
 	common.TestDBFree()
 	common.TestDBInit()
-	//userModelMocker(10)
+	//UserModelMocker(10)
 
 	r := gin.New()
 	UsersRegister(r.Group("/user"))
@@ -169,6 +168,7 @@ func TestUserSignUp(t *testing.T) {
 
 func TestUserLogin(t *testing.T) {
 	asserts := assert.New(t)
+	common.TestDBFree()
 	test_db = common.TestDBInit()
 
 	r := gin.New()
@@ -239,6 +239,7 @@ func TestUserLogin(t *testing.T) {
 
 func TestUserResetLogin(t *testing.T) {
 	asserts := assert.New(t)
+	common.TestDBFree()
 	test_db = common.TestDBInit()
 
 	r := gin.New()
@@ -318,9 +319,9 @@ func TestUserResetLogin(t *testing.T) {
 
 func TestUserAddBooks(t *testing.T) {
 	asserts := assert.New(t)
+	common.TestDBFree()
 	test_db = common.TestDBInit()
-	ret := bookModelMocker(10)
-	fmt.Println(ret)
+	BookModelMocker(10)
 
 	r := gin.New()
 	UsersRegister(r.Group("/user"))
