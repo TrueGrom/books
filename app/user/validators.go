@@ -1,7 +1,7 @@
 package user
 
 import (
-	"books-backend/app/common"
+	"books/app/common"
 	"github.com/gin-gonic/gin"
 )
 
@@ -108,7 +108,7 @@ func NewGetNewPasswordRequestValidator() GetNewPasswordRequestValidator {
 }
 
 type AddBookToUserRequestValidator struct {
-	BookId []uint `json:"book_id" binding:"required,dive,min=1,numeric"`
+	BookId []uint `json:"book_id" binding:"required,dive,min=1"`
 }
 
 func (self *AddBookToUserRequestValidator) Bind(c *gin.Context) error {

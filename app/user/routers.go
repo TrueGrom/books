@@ -1,7 +1,7 @@
 package user
 
 import (
-	"books-backend/app/common"
+	"books/app/common"
 	"github.com/gin-gonic/gin"
 	"net/http"
 )
@@ -15,10 +15,6 @@ func UsersRegister(router *gin.RouterGroup) {
 	router.DELETE("/books", JWTAuthorization(), DeleteBookFromUser)
 	router.GET("/books", JWTAuthorization(), GetBooks)
 	router.POST("/books/rating", JWTAuthorization(), AddRating)
-
-}
-
-func UsersModify(router *gin.RouterGroup) {
 	router.POST("/reset_password/:username", LoginReset)
 }
 
@@ -170,4 +166,3 @@ func AddRating(c *gin.Context) {
 	}
 	common.RenderResponse(c, http.StatusOK, nil, nil)
 }
-

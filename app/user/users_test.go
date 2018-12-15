@@ -1,0 +1,501 @@
+package user
+
+import (
+	"books/app/book"
+	"books/app/common"
+	"bytes"
+	"fmt"
+	"github.com/gin-gonic/gin"
+	"github.com/jinzhu/gorm"
+	"github.com/lib/pq"
+	"github.com/stretchr/testify/assert"
+	"net/http"
+	"net/http/httptest"
+	"testing"
+)
+
+var image_url = "https://golang.org/doc/gopher/frontpage.png"
+var test_db *gorm.DB
+
+func newUserModel() UserModel {
+	return UserModel{
+		ID:           2,
+		Username:     "asd123!@#ASD",
+		Email:        "wzt@g.cn",
+		Bio:          "heheda",
+		Image:        &image_url,
+		PasswordHash: "",
+	}
+}
+
+type request struct {
+	init           func(*http.Request)
+	url            string
+	method         string
+	bodyData       string
+	expectedCode   int
+	responseRegexg string
+	msg            string
+}
+
+func UserModelMocker(n int) []UserModel {
+	var offset int
+	test_db.Model(&UserModel{}).Count(&offset)
+	var ret []UserModel
+	for i := offset + 1; i <= offset+n; i++ {
+		image := fmt.Sprintf("http://image/%v.jpg", i)
+		userModel := UserModel{
+			Username: fmt.Sprintf("user%v", i),
+			Email:    fmt.Sprintf("user%v@linkedin.com", i),
+			Bio:      fmt.Sprintf("bio%v", i),
+			Image:    &image,
+		}
+		userModel.setPassword("password123")
+		test_db.Create(&userModel)
+		ret = append(ret, userModel)
+	}
+	return ret
+}
+
+func BookModelMocker(n int) []book.BookModel {
+	var offset int
+	test_db.Model(&book.BookModel{}).Count(&offset)
+	var ret []book.BookModel
+	for i := offset + 1; i <= offset+n; i++ {
+		bookModel := book.BookModel{
+			Authors:   pq.StringArray{fmt.Sprintf("author%v", i)},
+			Title:     fmt.Sprintf("title%v", i),
+			UrlId:     uint64(i),
+			ImageFile: fmt.Sprintf("image_file%v", i),
+		}
+		test_db.Create(&bookModel)
+		ret = append(ret, bookModel)
+	}
+	return ret
+}
+
+func HeaderTokenMock(req *http.Request, u uint) {
+	req.Header.Set("Authorization", fmt.Sprintf("JWT %v", common.GenToken(u)))
+}
+
+func HeaderSetTokenMock(req *http.Request, token string) {
+	req.Header.Set("Authorization", token)
+}
+
+func TestUserSignUp(t *testing.T) {
+	asserts := assert.New(t)
+	common.TestDBFree()
+	common.TestDBInit()
+	//UserModelMocker(10)
+
+	r := gin.New()
+	UsersRegister(r.Group("/user"))
+	var unauthRequestTests = []request{
+		{
+			func(req *http.Request) {},
+			"/user/",
+			"POST",
+			`{"username": "wangzitian0","email": "wzt@gg.cn","password": "jakejxke"}`,
+			http.StatusCreated,
+			`{"data":.*,"success":true}`,
+			"valid data and should return StatusCreated",
+		},
+		{
+			func(req *http.Request) {},
+			"/user/",
+			"POST",
+			`{"username": "wangzitian0","email": "wzt@gg.cn","password": "jakejxke"}`,
+			http.StatusUnprocessableEntity,
+			`{.*"success":false.*}`,
+			"duplicated data and should return StatusUnprocessableEntity",
+		},
+		{
+			func(req *http.Request) {
+				//common.TestDBFree(test_db)
+				//test_db = common.TestDBInit()
+				//test_db.AutoMigrate(&UserModel{})
+			},
+			"/user/",
+			"POST",
+			`{"username": "u","email": "wzt@gg.cn","password": "jakejxke"}`,
+			http.StatusUnprocessableEntity,
+			`{.*"success":false.*}`,
+			"too short username should return error",
+		},
+		{
+			func(req *http.Request) {
+				//common.TestDBFree(test_db)
+				//test_db = common.TestDBInit()
+				//test_db.AutoMigrate(&UserModel{})
+			},
+			"/user/",
+			"POST",
+			`{"username": "wangzitian0","email": "wzt@gg.cn","password": "j"}`,
+			http.StatusUnprocessableEntity,
+			`{.*"success":false.*}`,
+			"too short password should return error",
+		},
+		{
+			func(req *http.Request) {
+				//common.TestDBFree(test_db)
+				//test_db = common.TestDBInit()
+				//test_db.AutoMigrate(&UserModel{})
+			},
+			"/user/",
+			"POST",
+			`{"username": "wangzitian0","email": "wztgg.cn","password": "jakejxke"}`,
+			http.StatusUnprocessableEntity,
+			`{"Email":"{key: email}","success":false}`,
+			"email invalid should return error",
+		},
+	}
+	for _, req := range unauthRequestTests {
+		bodyData := req.bodyData
+		req_serv, err := http.NewRequest(req.method, req.url, bytes.NewBufferString(bodyData))
+		req_serv.Header.Set("Content-Type", "application/json")
+		asserts.NoError(err)
+
+		req.init(req_serv)
+
+		w := httptest.NewRecorder()
+		r.ServeHTTP(w, req_serv)
+
+		asserts.Equal(req.expectedCode, w.Code, "Response Status - "+req.msg)
+		asserts.Regexp(req.responseRegexg, w.Body.String(), "Response Content - "+req.msg)
+	}
+	common.TestDBFree()
+}
+
+func TestUserLogin(t *testing.T) {
+	asserts := assert.New(t)
+	common.TestDBFree()
+	test_db = common.TestDBInit()
+
+	r := gin.New()
+	UsersRegister(r.Group("/user"))
+	var unauthRequestTests = []request{
+		{
+			func(req *http.Request) {},
+			"/user/",
+			"POST",
+			`{"username": "wangzitian0","email": "wzt@gg.cn","password": "jakejxke"}`,
+			http.StatusCreated,
+			`{"data":.*,"success":true}`,
+			"create user and should return StatusCreated",
+		},
+		{
+			func(req *http.Request) {},
+			"/user/login",
+			"POST",
+			`{"username": "wangzitian0", "password": "jakejxke"}`,
+			http.StatusOK,
+			`{.*"success":true.*}`,
+			"successfully log in  and should return StatusOK",
+		},
+		{
+			func(req *http.Request) {},
+			"/user/login",
+			"POST",
+			`{"username": "wrong_username", "password": "jakejxke"}`,
+			http.StatusForbidden,
+			`{.*"success":false.*}`,
+			"wrong username in  and should return StatusForbidden",
+		},
+		{
+			func(req *http.Request) {},
+			"/user/login",
+			"POST",
+			`{"username": "wangzitian0", "password": "wrongpassword"}`,
+			http.StatusForbidden,
+			`{.*"success":false.*}`,
+			"wrong password  and should return StatusForbidden",
+		},
+		{
+			func(req *http.Request) {},
+			"/user/login",
+			"POST",
+			`{"usernakl;kme": "wangzitian0", "passwokkkkrd": "wrongpassword"}`,
+			http.StatusUnprocessableEntity,
+			`{.*"success":false.*}`,
+			"wrong password  and should return StatusUnprocessableEntity",
+		},
+	}
+	for _, req := range unauthRequestTests {
+		bodyData := req.bodyData
+		req_serv, err := http.NewRequest(req.method, req.url, bytes.NewBufferString(bodyData))
+		req_serv.Header.Set("Content-Type", "application/json")
+		asserts.NoError(err)
+
+		req.init(req_serv)
+
+		w := httptest.NewRecorder()
+		r.ServeHTTP(w, req_serv)
+
+		asserts.Equal(req.expectedCode, w.Code, "Response Status - "+req.msg)
+		asserts.Regexp(req.responseRegexg, w.Body.String(), "Response Content - "+req.msg)
+	}
+	common.TestDBFree()
+}
+
+func TestUserResetLogin(t *testing.T) {
+	asserts := assert.New(t)
+	common.TestDBFree()
+	test_db = common.TestDBInit()
+
+	r := gin.New()
+	UsersRegister(r.Group("/user"))
+	var unauthRequestTests = []request{
+		{
+			func(req *http.Request) {},
+			"/user/",
+			"POST",
+			`{"username": "wangzitian0","email": "wzt@gg.cn","password": "jakejxke"}`,
+			http.StatusCreated,
+			`{"data":.*,"success":true}`,
+			"create user and should return StatusCreated",
+		},
+		{
+			func(req *http.Request) {},
+			"/user/login",
+			"POST",
+			`{"username": "wangzitian0", "password": "jakejxke"}`,
+			http.StatusOK,
+			`{.*"success":true.*}`,
+			"successfully log in  and should return StatusOK",
+		},
+		{
+			func(req *http.Request) {},
+			"/user/reset_password/wangzitian0",
+			"POST",
+			`{"password": "jakejxke", "new_password": "Qwerty123"}`,
+			http.StatusOK,
+			`{.*"success":true.*}`,
+			"change password and should return StatusOK",
+		},
+		{
+			func(req *http.Request) {},
+			"/user/reset_password/wangzitian0",
+			"POST",
+			`{"passwlokrd": "jakejxke", "new_password": "Qwerty123"}`,
+			http.StatusUnprocessableEntity,
+			`{.*"success":false.*}`,
+			"sent incorrect field should return StatusUnprocessableEntity",
+		},
+		{
+			func(req *http.Request) {},
+			"/user/reset_password/wangzitian",
+			"POST",
+			`{"password": "jakejxke", "new_password": "Qwerty123"}`,
+			http.StatusBadRequest,
+			`{.*"success":false.*}`,
+			"sent username that doesn't exists in DB should return StatusBadRequest",
+		},
+		{
+			func(req *http.Request) {},
+			"/user/reset_password/wangzitian0",
+			"POST",
+			`{"password": "jakejxke", "new_password": "Qwerty123"}`,
+			http.StatusForbidden,
+			`{.*"success":false.*}`,
+			"sent old password should return StatusForbidden",
+		},
+	}
+	for _, req := range unauthRequestTests {
+		bodyData := req.bodyData
+		req_serv, err := http.NewRequest(req.method, req.url, bytes.NewBufferString(bodyData))
+		req_serv.Header.Set("Content-Type", "application/json")
+		asserts.NoError(err)
+
+		req.init(req_serv)
+
+		w := httptest.NewRecorder()
+		r.ServeHTTP(w, req_serv)
+
+		asserts.Equal(req.expectedCode, w.Code, "Response Status - "+req.msg)
+		asserts.Regexp(req.responseRegexg, w.Body.String(), "Response Content - "+req.msg)
+	}
+	common.TestDBFree()
+}
+
+func TestUserAddBooks(t *testing.T) {
+	asserts := assert.New(t)
+	common.TestDBFree()
+	test_db = common.TestDBInit()
+	BookModelMocker(10)
+
+	r := gin.New()
+	UsersRegister(r.Group("/user"))
+	var unauthRequestTests = []request{
+		{
+			func(req *http.Request) {},
+			"/user/",
+			"POST",
+			`{"username": "wangzitian0","email": "wzt@gg.cn","password": "jakejxke"}`,
+			http.StatusCreated,
+			`{"data":.*,"success":true}`,
+			"create user and should return StatusCreated",
+		},
+		{
+			func(req *http.Request) {},
+			"/user/login",
+			"POST",
+			`{"username": "wangzitian0", "password": "jakejxke"}`,
+			http.StatusOK,
+			`{.*"success":true.*}`,
+			"successfully log in  and should return StatusOK",
+		},
+		{
+			func(req *http.Request) {
+				user, _ := FindOneUser(UserModel{Username: "user1"})
+				HeaderTokenMock(req, user.ID)
+			},
+			"/user/books", "POST",
+			`{"book_id": [1,2,3,4]}`,
+			http.StatusOK,
+			`{.*"success":true.*}`,
+			"add books and should return StatusOK",
+		},
+		{
+			func(req *http.Request) {
+				user, _ := FindOneUser(UserModel{Username: "user1"})
+				HeaderTokenMock(req, user.ID)
+			},
+			"/user/books/rating", "POST",
+			`{"books": [{"book_id": 1,"rating": 2}]}`,
+			http.StatusOK,
+			`{.*"success":true.*}`,
+			"add rating to books and should return StatusOK",
+		},
+		{
+			func(req *http.Request) {
+				user, _ := FindOneUser(UserModel{Username: "user1"})
+				HeaderTokenMock(req, user.ID)
+			},
+			"/user/books/rating", "POST",
+			`{"book1s": [{"book_id": 1,"rating": 2}]}`,
+			http.StatusUnprocessableEntity,
+			`{.*"success":false.*}`,
+			"add rating to books and should return StatusOK",
+		},
+		{
+			func(req *http.Request) {
+				user, _ := FindOneUser(UserModel{Username: "user1"})
+				HeaderTokenMock(req, user.ID)
+			},
+			"/user/books", "DELETE",
+			`{"book_id": [1,2]}`,
+			http.StatusOK,
+			`{.*"success":true.*}`,
+			"delete books and should return StatusOK",
+		},
+		{
+			func(req *http.Request) {
+				user, _ := FindOneUser(UserModel{Username: "user1"})
+				HeaderTokenMock(req, user.ID)
+			},
+			"/user/books", "DELETE",
+			`{"bo0ok_id": [1,2]}`,
+			http.StatusUnprocessableEntity,
+			`{.*"success":false.*}`,
+			"delete books with invalid field and should return StatusOK",
+		},
+		{
+			func(req *http.Request) {
+				user, _ := FindOneUser(UserModel{Username: "user1"})
+				HeaderTokenMock(req, user.ID)
+			},
+			"/user/books", "GET",
+			`{}`,
+			http.StatusOK,
+			`{.*"success":true.*}`,
+			"get books and should return StatusOK",
+		},
+		{
+			func(req *http.Request) {
+				user, _ := FindOneUser(UserModel{Username: "user1"})
+				HeaderTokenMock(req, user.ID)
+			},
+			"/user/books", "POST",
+			`{"bo1ok_id": [1,2,3,4]}`,
+			http.StatusUnprocessableEntity,
+			`{.*"success":false.*}`,
+			"invalid field post to /books - should return 422",
+		},
+		{
+			func(req *http.Request) {},
+			"/user/books", "POST",
+			`{"book_id": [1,2,3,4]}`,
+			http.StatusBadRequest,
+			`{"message":"Authorization header not provided"}`,
+			"try to add books without Token - should return StatusBadRequest",
+		},
+		{
+			func(req *http.Request) {
+				HeaderSetTokenMock(req, "JWT")
+			},
+			"/user/books", "POST",
+			`{"book_id": [1,2,3,4]}`,
+			http.StatusForbidden,
+			`{"message":"Usage: JWT .*"}`,
+			"add books and should return StatusOK",
+		},
+		{
+			func(req *http.Request) {
+				HeaderSetTokenMock(req, "Bearer token")
+			},
+			"/user/books", "POST",
+			`{"book_id": [1,2,3,4]}`,
+			http.StatusForbidden,
+			`{"message":"Authorization header need to start with 'JWT'"}`,
+			"add books and should return StatusOK",
+		},
+		{
+			func(req *http.Request) {
+				HeaderSetTokenMock(req, "JWT token")
+			},
+			"/user/books", "POST",
+			`{"book_id": [1,2,3,4]}`,
+			http.StatusForbidden,
+			`{"message":"Token is invalid"}`,
+			"add books and should return StatusOK",
+		},
+	}
+	for _, req := range unauthRequestTests {
+		bodyData := req.bodyData
+		req_serv, err := http.NewRequest(req.method, req.url, bytes.NewBufferString(bodyData))
+		req_serv.Header.Set("Content-Type", "application/json")
+		asserts.NoError(err)
+
+		req.init(req_serv)
+
+		w := httptest.NewRecorder()
+		r.ServeHTTP(w, req_serv)
+
+		asserts.Equal(req.expectedCode, w.Code, "Response Status - "+req.msg)
+		asserts.Regexp(req.responseRegexg, w.Body.String(), "Response Content - "+req.msg)
+	}
+	common.TestDBFree()
+}
+
+func TestUserModel(t *testing.T) {
+	asserts := assert.New(t)
+
+	userModel := newUserModel()
+	err := userModel.checkPassword("")
+	asserts.Error(err, "empty password should return err")
+
+	userModel = newUserModel()
+	err = userModel.setPassword("")
+	asserts.Error(err, "empty password can not be set null")
+
+	userModel = newUserModel()
+	err = userModel.setPassword("asd123!@#ASD")
+	asserts.NoError(err, "password should be set successful")
+	asserts.Len(userModel.PasswordHash, 60, "password hash length should be 60")
+
+	err = userModel.checkPassword("sd123!@#ASD")
+	asserts.Error(err, "password should be checked and not validated")
+
+	err = userModel.checkPassword("asd123!@#ASD")
+	asserts.NoError(err, "password should be checked and validated")
+}

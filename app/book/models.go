@@ -1,7 +1,7 @@
 package book
 
 import (
-	"books-backend/app/common"
+	"books/app/common"
 	"fmt"
 	_ "github.com/jinzhu/gorm/dialects/postgres"
 	"github.com/lib/pq"

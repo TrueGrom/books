@@ -1,11 +1,11 @@
 package user
 
 import (
-	"books-backend/app/book"
-	"books-backend/app/common"
+	"books/app/book"
+	"books/app/common"
+	"database/sql/driver"
 	"errors"
 	"golang.org/x/crypto/bcrypt"
-	"database/sql/driver"
 )
 
 const cost = 7
@@ -41,11 +41,6 @@ func (BooksToUsers) TableName() string {
 func (u *BookStatus) Scan(value interface{}) error { *u = BookStatus(value.([]byte)); return nil }
 func (u BookStatus) Value() (driver.Value, error)  { return string(u), nil }
 
-func AutoMigrate() {
-	db := common.GetDB()
-	db.AutoMigrate(&UserModel{})
-}
-
 func (u *UserModel) setPassword(password string) error {
 	if len(password) == 0 {
 		return errors.New("password should not be empty!")
@@ -77,7 +72,7 @@ func SaveOne(data interface{}) error {
 
 func (model *UserModel) Update(data interface{}) error {
 	db := common.GetDB()
-	err := db.Model(model).Update(data).Error
+	err := db.Save(data).Error
 	return err
 }
 
