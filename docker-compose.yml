@@ -1,0 +1,30 @@
+version: '3'
+services:
+  postgres:
+    image: postgres:11.1
+    env_file:
+      - .env
+    environment:
+      POSTGRES_DB: books
+      POSTGRES_USER: books
+      POSTGRES_PASSWORD: books
+    volumes:
+      - ${DB_DATA}:/var/lib/postgresql/data
+    ports:
+      - ${HOST_DB_PORT:-5433}:5432
+  app-dev:
+    depends_on:
+      - postgres
+    build:
+      context: .
+    env_file:
+      - .env
+    environment:
+      DB_HOST: postgres
+      DB_PORT: 5432
+      DB_NAME: books
+      DB_USER: books
+      DB_PASSWORD: books
+      DB_SSL_MODE: disable
+    ports:
+      - ${PORT:-8080}:${PORT:-8080}
