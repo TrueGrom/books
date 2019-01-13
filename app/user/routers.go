@@ -24,11 +24,13 @@ func UserSighup(c *gin.Context) {
 		common.RenderResponse(c, http.StatusUnprocessableEntity, common.NewValidatorError(err), nil)
 		return
 	}
-	if err := SaveOne(&userModelValidator.userModel); err != nil {
+	user, err := SaveOne(userModelValidator.userModel)
+	if err != nil {
 		common.RenderResponse(c, http.StatusUnprocessableEntity, common.NewError("database", err), nil)
 		return
 	}
-	common.RenderResponse(c, http.StatusCreated, nil, nil)
+	token := common.GenToken(user.ID)
+	common.RenderResponse(c, http.StatusCreated, nil, gin.H{"token": token})
 }
 
 func LoginUser(c *gin.Context) {
