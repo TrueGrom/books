@@ -1,33 +1,19 @@
 package main
 
 import (
-	"books-backend/app/book"
-	"books-backend/app/common"
-	"books-backend/app/user"
+	"books/app/book"
+	"books/app/comment"
+	"books/app/common"
+	"books/app/user"
 	"github.com/gin-gonic/gin"
-	"github.com/jinzhu/gorm"
-	_ "github.com/jinzhu/gorm/dialects/postgres"
+	_ "github.com/golang-migrate/migrate/source/file"
+
+	_ "github.com/lib/pq"
 )
 
-func Migrate(db *gorm.DB) {
-	user.AutoMigrate()
-}
-
 func main() {
-
 	db := common.Init()
-	//Migrate(db)
 	defer db.Close()
-
-	//user1, _ := user.FindOneUser(user.UserModel{ID: 5})
-	//user1.AddBooksToUser(2)
-
-	//books, err := book.FindBooksByTitle("тест", 20)
-	//if err != nil {
-	//	fmt.Println(err)
-	//} else {
-	//	fmt.Println(books)
-	//}
 
 	r := gin.Default()
 	r.Use(common.CORSMiddleware())
@@ -36,10 +22,12 @@ func main() {
 
 	userGroup := v1.Group("users/")
 	user.UsersRegister(userGroup)
-	user.UsersModify(userGroup)
 
 	bookGroup := v1.Group("books/")
 	book.BooksRegister(bookGroup)
+
+	commentGroup := v1.Group("comments/")
+	comment.CommentsRegister(commentGroup)
 
 	r.Run()
 }

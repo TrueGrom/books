@@ -1,7 +1,7 @@
 package user
 
 import (
-	"books-backend/app/common"
+	"books/app/common"
 	"github.com/gin-gonic/gin"
 	"net/http"
 )
@@ -15,9 +15,6 @@ func UsersRegister(router *gin.RouterGroup) {
 	router.DELETE("/books", JWTAuthorization(), DeleteBookFromUser)
 	router.GET("/books", JWTAuthorization(), GetBooks)
 	router.POST("/books/rating", JWTAuthorization(), AddRating)
-}
-
-func UsersModify(router *gin.RouterGroup) {
 	router.POST("/reset_password/:username", LoginReset)
 }
 
@@ -129,10 +126,6 @@ func AddBookToUser(c *gin.Context) {
 		common.RenderResponse(c, http.StatusUnprocessableEntity, common.NewValidatorError(err), nil)
 		return
 	}
-	//if !book.IsExist(book.BookModel{ID: addBookToUserRequestValidator.BookId}) {
-	//	common.RenderResponse(c, http.StatusUnprocessableEntity, common.CommonError{gin.H{"errors": gin.H{"book_id": "Book not found"}}}, nil)
-	//	return
-	//}
 	userInt, _ := c.Get("user")
 	user, _ := userInt.(UserModel)
 	user.AddBooksToUser(addBookToUserRequestValidator.BookId)
@@ -145,11 +138,6 @@ func DeleteBookFromUser(c *gin.Context) {
 		common.RenderResponse(c, http.StatusUnprocessableEntity, common.NewValidatorError(err), nil)
 		return
 	}
-	//if !book.IsExist(book.BookModel{ID:addBookToUserRequestValidator.BookId}) {
-	//	common.RenderResponse(c, http.StatusUnprocessableEntity, common.CommonError{gin.H{"errors":gin.H{"book_id":"Book not found"}}}, nil)
-	//	return
-	//}
-
 	userInt, _ := c.Get("user")
 	user, _ := userInt.(UserModel)
 	user.DeleteBooksToUser(addBookToUserRequestValidator.BookId)

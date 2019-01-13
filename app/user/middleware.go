@@ -1,7 +1,7 @@
 package user
 
 import (
-	"books-backend/app/common"
+	"books/app/common"
 	"errors"
 	"github.com/dgrijalva/jwt-go"
 	"github.com/gin-gonic/gin"

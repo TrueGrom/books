@@ -1,8 +1,8 @@
 package user
 
 import (
-	"books-backend/app"
-	"books-backend/app/common"
+	"books/app"
+	"books/app/common"
 	"gopkg.in/gomail.v2"
 )
 
